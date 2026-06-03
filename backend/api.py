@@ -1,22 +1,31 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import pyodbc
+import pymssql
 
 app = Flask(__name__)
 CORS(app)
 
-# === CONFIGURACIÓN DE SQL SERVER - CAMBIA ESTOS VALORES ===
-SERVER = '190.103.87.151,12433'        # Cambia por IP o nombre de tu servidor
-DATABASE = 'Campo_LaReforma'  # Cambia por el nombre real de tu BD
-USERNAME = 'lballari'     # Cambia por tu usuario
-PASSWORD = 'Clave.1369'  # Cambia por tu contraseña
+# === CONFIGURACIÓN DE SQL SERVER ===
+# Separamos la IP y el Puerto para pymssql
+SERVER = '190.103.87.151'        
+PORT = 12433                     
+DATABASE = 'Campo_LaReforma'  
+USERNAME = 'lballari'     
+PASSWORD = 'Clave.1369'  
 
-# Usar el driver ODBC 18 (tienes este instalado)
-DRIVER = '{ODBC Driver 18 for SQL Server}'
+def obtener_conexion():
+    """Función auxiliar para conectar de forma limpia usando pymssql"""
+    return pymssql.connect(
+        server=SERVER,
+        port=PORT,
+        user=USERNAME,
+        password=PASSWORD,
+        database=DATABASE
+    )
 
 @app.route('/api/health')
 def health():
-    return jsonify({"status": "ok", "mensaje": "Servidor activo"})
+    return jsonify({"status": "ok", "mensaje": "Servidor activo en Render"})
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -24,28 +33,17 @@ def login():
         print("\n--- Intento de Login Recibido ---")
         data = request.get_json()
         user_input = data.get('usuario')
-        # Corregimos 'contraseña' por 'password' para que coincida con el frontend
         pass_input = data.get('contraseña') 
 
         print(f"Usuario recibido: {user_input}")
+        print("Intentando conectar a SQL Server con pymssql...")
         
-        print("Intentando conectar a SQL Server...")
-        conn_str = (
-            f'DRIVER={DRIVER};'
-            f'SERVER={SERVER};'
-            f'DATABASE={DATABASE};'
-            f'UID={USERNAME};'
-            f'PWD={PASSWORD};'
-            f'TrustServerCertificate=yes;'
-            f'Encrypt=yes'
-        )
-        
-        conn = pyodbc.connect(conn_str)
+        conn = obtener_conexion()
         cursor = conn.cursor()
         print("✅ Conexión a SQL Server exitosa")
         
-        # Usamos nombres de columnas según tu tabla v2.Usuarios
-        query = "SELECT COUNT(*) FROM v2.Usuarios WHERE usuario = ? AND contraseña = ?"
+        # Consulta segura parametrizada (en pymssql se usa %s en lugar de ?)
+        query = "SELECT COUNT(*) FROM v2.Usuarios WHERE usuario = %s AND contraseña = %s"
         cursor.execute(query, (user_input, pass_input))
         exists = cursor.fetchone()[0]
         conn.close()
@@ -64,25 +62,12 @@ def login():
 @app.route('/api/datos')
 def get_datos():
     try:
-        # Construir cadena de conexión
-        conn_str = (
-            f'DRIVER={DRIVER};'
-            f'SERVER={SERVER};'
-            f'DATABASE={DATABASE};'
-            f'UID={USERNAME};'
-            f'PWD={PASSWORD};'
-            f'TrustServerCertificate=yes;'  # Importante para conexiones locales
-            f'Encrypt=yes'                   # ODBC 18 requiere encrypt
-        )
-        
-        print(f"Intentando conectar a: {SERVER}")
+        print(f"Intentando conectar a: {SERVER}:{PORT}")
         print(f"Base de datos: {DATABASE}")
         
-        conn = pyodbc.connect(conn_str)
+        conn = obtener_conexion()
         cursor = conn.cursor()
         
-        # Cambia 'tu_tabla' por el nombre real de tu tabla
-        # Ejemplo: 'Clientes' o 'usuarios'
         cursor.execute("SELECT TOP 5 * FROM v2.Usuarios")
         
         # Obtener nombres de columnas
@@ -113,6 +98,7 @@ def get_datos():
         })
         
     except Exception as e:
+        print(f"❌ ERROR EN DATOS: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
@@ -120,10 +106,7 @@ def get_datos():
 
 if __name__ == '__main__':
     print("=" * 50)
-    print("🚀 API Flask iniciada")
-    print(f"📡 Conectando a SQL Server: {SERVER}")
-    print(f"🔧 Driver: {DRIVER}")
-    print("🧪 Prueba: http://localhost:5000/api/health")
-    print("📊 Datos: http://localhost:5000/api/datos")
+    print("🚀 API Flask iniciada (Modo de prueba local)")
+    print(f"📡 Conectando a SQL Server: {SERVER}:{PORT}")
     print("=" * 50)
     app.run(host='0.0.0.0', port=5000, debug=True)

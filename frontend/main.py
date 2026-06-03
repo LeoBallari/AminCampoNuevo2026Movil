@@ -4,7 +4,7 @@ import threading
 
 # === IMPORTANTE: Cambia esto por la IP real de tu computadora ===
 # Puedes obtenerla ejecutando 'ipconfig' en la terminal de Windows.
-API_URL = "http://192.168.0.102:5000" 
+API_URL = "https://amincamponuevo2026movil.onrender.com" 
 
 def main(page: ft.Page):
     page.title = "Test de Conexión"
