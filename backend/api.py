@@ -13,17 +13,16 @@ USERNAME = 'lballari'
 PASSWORD = 'Clave.1369'  
 
 def obtener_conexion():
-    # Añadimos un tiempo de espera (timeout) de 10 segundos para que no se congele
     return pymssql.connect(
         server=SERVER,
         port=PORT,
         user=USERNAME,
         password=PASSWORD,
         database=DATABASE,
-        login_timeout=10,
-        timeout=10
+        login_timeout=15,
+        timeout=15,
+        tds_version='7.3'  # Forzamos la versión del protocolo compatible con SQL Server
     )
-
 @app.route('/api/health')
 def health():
     return jsonify({"status": "ok", "mensaje": "Servidor activo en Render"})
