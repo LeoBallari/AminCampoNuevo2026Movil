@@ -55,5 +55,31 @@ def login():
         print("=================================")
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/campañas', methods=['GET'])
+def get_campanas():
+    try:
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+        # Ajusta el nombre de la tabla según tu base de datos
+        cursor.execute("SELECT DISTINCT nombre FROM v2.Campañas ORDER BY nombre DESC")
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify([row[0] for row in rows])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/cultivos', methods=['GET'])
+def get_cultivos():
+    try:
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+        # Ajusta el nombre de la tabla según tu base de datos
+        cursor.execute("SELECT DISTINCT nombre_cultivo FROM v2.Cultivos ORDER BY nombre_cultivo")
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify([row[0] for row in rows])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

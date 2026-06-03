@@ -55,6 +55,10 @@ class App:
         
         elif self.page.route == "/config":
             self.page.views.append(ConfigScreen(self.page).show())
+        
+        elif self.page.route == "/despachos":
+            from screens.despachos_screen import DespachosScreen
+            self.page.views.append(DespachosScreen(self.page).show())
             
         self.page.update()
         

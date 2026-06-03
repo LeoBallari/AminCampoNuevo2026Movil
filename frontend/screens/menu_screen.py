@@ -23,9 +23,7 @@ class MenuScreen:
         
         def handle_despachos(e):
             """Maneja click en Despachos"""
-            # El sistema de navegación nativo ahora se dispara así:
-            # self.page.go("/despachos")
-            print("Navegando a Despachos")
+            self.page.go("/despachos")
             
         def handle_cosecha(e):
             """Maneja click en Cosecha"""
