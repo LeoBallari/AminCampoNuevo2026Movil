@@ -6,7 +6,6 @@ app = Flask(__name__)
 CORS(app)
 
 # === CONFIGURACIÓN DE SQL SERVER ===
-# Separamos la IP y el Puerto para pymssql
 SERVER = '190.103.87.151'        
 PORT = 12433                     
 DATABASE = 'Campo_LaReforma'  
@@ -25,7 +24,7 @@ def obtener_conexion():
 
 @app.route('/api/health')
 def health():
-    return jsonify({"status": "ok", "mensaje": "Servidor activo en Render"})
+    return jsonify({"status": "ok", "mensaje": "Servidor activo en pythonanywhere"})
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -42,7 +41,6 @@ def login():
         cursor = conn.cursor()
         print("✅ Conexión a SQL Server exitosa")
         
-        # Consulta segura parametrizada (en pymssql se usa %s en lugar de ?)
         query = "SELECT COUNT(*) FROM v2.Usuarios WHERE usuario = %s AND contraseña = %s"
         cursor.execute(query, (user_input, pass_input))
         exists = cursor.fetchone()[0]

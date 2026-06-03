@@ -4,7 +4,7 @@ import threading
 
 # === IMPORTANTE: Cambia esto por la IP real de tu computadora ===
 # Puedes obtenerla ejecutando 'ipconfig' en la terminal de Windows.
-API_URL = "https://amincamponuevo2026movil.onrender.com" 
+API_URL = "https://lbalalri.pythonanywhere.com"
 
 def main(page: ft.Page):
     page.title = "Test de Conexión"
@@ -62,9 +62,9 @@ def main(page: ft.Page):
 
     page.add(
         ft.Icon(ft.Icons.SECURITY, size=50, color=ft.Colors.BLUE),
-        ft.Text("AminCampo 2026", size=24, weight=ft.FontWeight.BOLD),
+        ft.Text("AdminCampo 2026", size=24, weight=ft.FontWeight.BOLD),
         ft.Divider(),
-        txt_user,
+        txt_user,   
         txt_pass,
         loading,
         status_text,
