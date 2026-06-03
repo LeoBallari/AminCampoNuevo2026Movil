@@ -1,9 +1,10 @@
 """
-Pantalla de Login
+Pantalla de Login - Adaptada a Vistas Modernas y Segura para Android
 """
 import flet as ft
 import threading
 import os
+import time
 from config import BASE_DIR
 from services.auth_service import AuthService
 
@@ -16,10 +17,8 @@ class LoginScreen:
         self.on_login_success = on_login_success
         
     def show(self):
-        """Muestra la pantalla de login"""
-        self.page.clean()
-        self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
-        self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        """Prepara y devuelve la vista de la pantalla de login"""
+        # Eliminamos self.page.clean() ya que Flet maneja la limpieza mediante rutas
         
         # Elementos de UI
         txt_user = ft.TextField(label="Usuario", width=300, prefix_icon=ft.Icons.PERSON)
@@ -64,9 +63,12 @@ class LoginScreen:
                 self.page.update()
                 
                 if result['success']:
-                    # Llamar callback después de 1 segundo
+                    # Esperamos 1 segundo de forma segura dentro del hilo secundario
+                    time.sleep(1.0)
+                    
+                    # Llamamos al callback de éxito directo al main sin crear hilos huérfanos
                     if self.on_login_success:
-                        threading.Timer(1.0, lambda: self.on_login_success(txt_user.value)).start()
+                        self.on_login_success(txt_user.value)
 
             threading.Thread(target=fetch, daemon=True).start()
 
@@ -83,13 +85,19 @@ class LoginScreen:
             height=100
         )
         
-        self.page.add(
-            imagen,
-            ft.Text("Campo Movil 2026", size=24, weight=ft.FontWeight.BOLD),
-            ft.Divider(),
-            txt_user,
-            txt_pass,
-            loading,
-            status_text,
-            btn_login
+        # === RETORNO DE VISTA NATIVA ===
+        return ft.View(
+            route="/",
+            vertical_alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                imagen,
+                ft.Text("Campo Movil 2026", size=24, weight=ft.FontWeight.BOLD),
+                ft.Divider(),
+                txt_user,
+                txt_pass,
+                loading,
+                status_text,
+                btn_login
+            ]
         )

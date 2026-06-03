@@ -13,10 +13,7 @@ class MenuScreen:
         self.on_logout = on_logout
         
     def show(self):
-        """Muestra la pantalla del menú"""
-        self.page.clean()
-        self.page.vertical_alignment = ft.MainAxisAlignment.START
-        self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        """Prepara y devuelve la vista del menú para el sistema de rutas"""
         
         def handle_logout(e):
             """Maneja el logout"""
@@ -25,17 +22,16 @@ class MenuScreen:
         
         def handle_reportes(e):
             """Maneja click en Reportes"""
-            # TODO: Implementar pantalla de reportes
+            # El sistema de navegación nativo ahora se dispara así:
+            # self.page.go("/despachos")
             print("Navegando a Reportes")
         
         def handle_settings(e):
             """Maneja click en Configuración"""
-            # TODO: Implementar pantalla de configuración
-            print("Navegando a Configuración")
+            self.page.go("/config")
         
         def handle_perfil(e):
             """Maneja click en Mi Perfil"""
-            # TODO: Implementar pantalla de perfil
             print("Navegando a Perfil")
         
         # Crear botones del menú
@@ -73,30 +69,35 @@ class MenuScreen:
             on_click=handle_logout
         )
         
-        # Use Container instead of Padding for broader compatibility
-        self.page.add(
-            ft.Container(
-                content=ft.Text(
-                    f"¡Bienvenido, {self.usuario_nombre}!",
-                    size=20,
-                    weight=ft.FontWeight.BOLD,
-                    text_align=ft.TextAlign.CENTER
+        # === RETORNAMOS LA VISTA NATIVA ===
+        return ft.View(
+            route="/menu",
+            vertical_alignment=ft.MainAxisAlignment.START,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                ft.Container(
+                    content=ft.Text(
+                        f"¡Bienvenido, {self.usuario_nombre}!",
+                        size=20,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER
+                    ),
+                    padding=20
                 ),
-                padding=20
-            ),
-            ft.Divider(),
-            ft.Container(
-                content=ft.Column(
-                    controls=[
-                        btn_reportes,
-                        btn_settings,
-                        btn_perfil,
-                        ft.Divider(),
-                        btn_logout
-                    ],
-                    spacing=10,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                ),
-                padding=20
-            )
+                ft.Divider(),
+                ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            btn_reportes,
+                            btn_settings,
+                            btn_perfil,
+                            ft.Divider(),
+                            btn_logout
+                        ],
+                        spacing=10,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                    ),
+                    padding=20
+                )
+            ]
         )

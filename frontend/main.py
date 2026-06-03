@@ -6,7 +6,7 @@ import flet as ft
 from config import APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT
 from screens.login_screen import LoginScreen
 from screens.menu_screen import MenuScreen
-
+from screens.config_screen import ConfigScreen
 
 class App:
     """Controlador principal de la aplicación"""
@@ -15,36 +15,57 @@ class App:
         self.page = page
         self.usuario_actual = None
         
-        # Configurar página
+        # Configurar página usando la sintaxis moderna para Windows
         self.page.title = APP_TITLE
         self.page.theme_mode = THEME_MODE
         self.page.window.width = WINDOW_WIDTH
         self.page.window.height = WINDOW_HEIGHT
         self.page.window.resizable = False
         
+        # Asignar eventos de navegación
+        self.page.on_route_change = self.on_route_change
+        self.page.on_view_pop = self.on_view_pop
+        
     def on_login_success(self, usuario_nombre: str):
         """Callback cuando el login es exitoso"""
         self.usuario_actual = usuario_nombre
-        self.mostrar_menu()
+        self.page.go("/menu")
     
     def on_logout(self):
         """Callback cuando el usuario se desconecta"""
         self.usuario_actual = None
-        self.mostrar_login()
-    
-    def mostrar_login(self):
-        """Muestra la pantalla de login"""
-        login_screen = LoginScreen(self.page, on_login_success=self.on_login_success)
-        login_screen.show()
-    
-    def mostrar_menu(self):
-        """Muestra el menú principal"""
-        menu_screen = MenuScreen(self.page, self.usuario_actual, on_logout=self.on_logout)
-        menu_screen.show()
+        self.page.go("/")
+        
+    def on_route_change(self, e):
+        """Manejador central de cambios de pantalla"""
+        self.page.views.clear()
+        
+        # 1. Pantalla de Login
+        if self.page.route == "/":
+            login_screen = LoginScreen(self.page, on_login_success=self.on_login_success)
+            self.page.views.append(login_screen.show())
+            
+        # 2. Pantalla de Menú Principal
+        elif self.page.route == "/menu":
+            menu_screen = MenuScreen(self.page, self.usuario_actual, on_logout=self.on_logout)
+            self.page.views.append(menu_screen.show())
+        
+        elif self.page.route == "/config":
+            self.page.views.append(ConfigScreen(self.page).show())
+            
+        self.page.update()
+        
+    def on_view_pop(self, e):
+        """Maneja el retroceso de pantalla nativo"""
+        if len(self.page.views) > 1:
+            self.page.views.pop()
+            top_view = self.page.views[-1]
+            self.page.route = top_view.route
+            self.page.update()
     
     def run(self):
-        """Inicia la aplicación mostrando login"""
-        self.mostrar_login()
+        """Inicia la aplicación navegando a la raíz"""
+        self.page.go("/")
 
 
 def main(page: ft.Page):
