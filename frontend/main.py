@@ -7,6 +7,7 @@ from config import APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT
 from screens.login_screen import LoginScreen
 from screens.menu_screen import MenuScreen
 from screens.config_screen import ConfigScreen
+import os
 
 class App:
     """Controlador principal de la aplicación"""
@@ -21,6 +22,8 @@ class App:
         self.page.window.width = WINDOW_WIDTH
         self.page.window.height = WINDOW_HEIGHT
         self.page.window.resizable = False
+        # Icono para la ventana de escritorio
+        self.page.window.icon = os.path.join("assets", "icon.png")
         
         # Asignar eventos de navegación
         self.page.on_route_change = self.on_route_change

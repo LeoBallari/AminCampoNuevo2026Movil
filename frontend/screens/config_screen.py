@@ -1,4 +1,6 @@
 import flet as ft
+import os
+from config import BASE_DIR
 
 class ConfigScreen:
     def __init__(self, page: ft.Page):
@@ -11,9 +13,19 @@ class ConfigScreen:
             # El AppBar es clave: Flet detecta que hay pantallas "abajo" 
             # en la pila y pone la flecha de volver sola.
             appbar=ft.AppBar(
+                leading=ft.Container(
+                    content=
+                        ft.IconButton(
+                            icon=ft.Icons.HOME,
+                            icon_color=ft.Colors.WHITE,
+                            on_click=lambda _: self.page.go("/menu")
+                        ),
+                    padding=5,
+                ),
                 title=ft.Text("Configuración"),
                 bgcolor=ft.Colors.BLUE_GREY_900,
                 color=ft.Colors.WHITE,
+                center_title=False,
             ),
             vertical_alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
