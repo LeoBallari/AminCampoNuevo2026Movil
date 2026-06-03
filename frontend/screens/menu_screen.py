@@ -2,7 +2,8 @@
 Pantalla del Menú Principal
 """
 import flet as ft
-
+import os
+from config import BASE_DIR
 
 class MenuScreen:
     """Pantalla del menú principal después del login"""
@@ -76,13 +77,23 @@ class MenuScreen:
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
                 ft.Container(
-                    content=ft.Text(
-                        f"¡Bienvenido, {self.usuario_nombre}!",
-                        size=20,
-                        weight=ft.FontWeight.BOLD,
-                        text_align=ft.TextAlign.CENTER
+                    content=ft.Row(
+                        controls=[
+                            ft.Image(
+                                src=os.path.join(BASE_DIR, "assets/imagenes/logo_reportes.png"),
+                                width=50,
+                                height=50
+                            ),
+                            ft.Text(
+                                f"¡Bienvenido, {self.usuario_nombre}!",
+                                size=20,
+                                weight=ft.FontWeight.BOLD,
+                                text_align=ft.TextAlign.CENTER
+                            )
+                        ]
                     ),
-                    padding=20
+                    padding=20,
+                    bgcolor=ft.Colors.BLUE_GREY_500
                 ),
                 ft.Divider(),
                 ft.Container(

@@ -39,13 +39,29 @@ class LoginScreen:
 
         def intentar_login(e):
             """Maneja el click en el botón de login"""
+            # === MODO DESARROLLO (Bypass Local rápido) ===
+            # Si ponés '13' y '13', entra directo sin ir a Render ni esperar 1 minuto
+            if txt_user.value == "13" and txt_pass.value == "13":
+                status_text.color = ft.Colors.GREEN
+                status_text.value = "⚡ Modo Desarrollo: Acceso Local Directo"
+                self.page.update()
+                
+                import time
+                time.sleep(0.5) # Un mini delay para ver el cartel
+                
+                if self.on_login_success:
+                    self.on_login_success("Desarrollador")
+                return
+            # =============================================
+
+            # Validación normal de campos
             if not txt_user.value or not txt_pass.value:
                 status_text.value = "⚠️ Completa todos los campos"
                 status_text.color = ft.Colors.ORANGE
                 self.page.update()
                 return
 
-            # Mostrar carga
+            # Mostrar carga real (Conexión a Render)
             loading.visible = True
             status_text.value = "Despertando servidor...\nEsto puede demorar hasta 1 minuto si estaba inactivo."
             status_text.color = ft.Colors.BLUE_700
@@ -53,7 +69,7 @@ class LoginScreen:
             self.page.update()
 
             def fetch():
-                """Realiza el login en background"""
+                """Realiza el login en background conectando a la API"""
                 result = AuthService.login(txt_user.value, txt_pass.value)
                 
                 loading.visible = False
@@ -63,10 +79,8 @@ class LoginScreen:
                 self.page.update()
                 
                 if result['success']:
-                    # Esperamos 1 segundo de forma segura dentro del hilo secundario
+                    import time
                     time.sleep(1.0)
-                    
-                    # Llamamos al callback de éxito directo al main sin crear hilos huérfanos
                     if self.on_login_success:
                         self.on_login_success(txt_user.value)
 
