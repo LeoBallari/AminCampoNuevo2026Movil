@@ -19,10 +19,11 @@ def obtener_conexion():
         user=USERNAME,
         password=PASSWORD,
         database=DATABASE,
-        login_timeout=15,
-        timeout=15,
-        tds_version='7.3'  # Forzamos la versión del protocolo compatible con SQL Server
+        login_timeout=10,
+        timeout=10,
+        tds_version='7.0'  # Cambiamos a 7.0 para igualar la compatibilidad de jTDS
     )
+    
 @app.route('/api/health')
 def health():
     return jsonify({"status": "ok", "mensaje": "Servidor activo en Render"})
