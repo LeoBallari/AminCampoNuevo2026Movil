@@ -50,6 +50,9 @@ def login():
             return jsonify({"success": False, "error": "Credenciales incorrectas"}), 401
 
     except Exception as e:
+        print("======== ERROR DETECTADO ========")
+        print(str(e))
+        print("=================================")
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
