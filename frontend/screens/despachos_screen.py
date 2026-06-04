@@ -10,20 +10,103 @@ class DespachosScreen:
         self.dd_campana = ft.Dropdown(label="Campaña", expand=True, on_change=self.on_filter_change)
         self.dd_cultivo = ft.Dropdown(label="Cultivo", expand=True, on_change=self.on_filter_change)
         self.loading = ft.ProgressBar(visible=False, color=ft.Colors.BLUE_400)
+        self.lv_resumen = ft.ListView(expand=True, spacing=10, padding=10)
+        
+        # Contenedores para alternar vistas
+        self.view_resumen = ft.Column(visible=True, expand=True)
+        self.view_detalle = ft.Column(visible=False, expand=True)
+        
         self.tabla_datos = ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text("Fecha")),
+                ft.DataColumn(ft.Text("Fec.")),
                 ft.DataColumn(ft.Text("Lote")),
-                ft.DataColumn(ft.Text("Kg Netos"), numeric=True),
-                ft.DataColumn(ft.Text("Destino")),
+                ft.DataColumn(ft.Text("Kg")),
+                ft.DataColumn(ft.Text("Dest.")),
             ],
             rows=[],
+            column_spacing=15,
+            heading_row_height=40,
         )
 
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""
-        print(f"Filtrando por IDs -> Campaña: {self.dd_campana.value}, Cultivo: {self.dd_cultivo.value}")
-        # Aquí llamaremos a la función de cargar tabla más adelante
+        if self.dd_campana.value and self.dd_cultivo.value:
+            self.view_resumen.visible = True
+            self.view_detalle.visible = False
+            threading.Thread(target=self.cargar_resumen, daemon=True).start()
+
+    def cargar_resumen(self):
+        """Carga el resumen agrupado por entidad"""
+        self.loading.visible = True
+        self.lv_resumen.controls.clear()
+        self.page.update()
+
+        try:
+            params = {"id_campana": self.dd_campana.value, "id_cultivo": self.dd_cultivo.value}
+            with httpx.Client() as client:
+                res = client.get(f"{API_URL}/api/despachos/resumen", params=params, timeout=15)
+                if res.status_code == 200:
+                    datos = res.json()
+                    for item in datos:
+                        self.lv_resumen.controls.append(
+                            ft.ListTile(
+                                title=ft.Text(item['entidad'], weight="bold"),
+                                subtitle=ft.Text(f"{item['qq']:.0f} qq — {item['cantidad']} despachos"),
+                                trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
+                                bgcolor=ft.Colors.BLUE_GREY_50,
+                                on_click=lambda e, id_ent=item['id'], nom=item['entidad']: self.ver_detalle(id_ent, nom)
+                            )
+                        )
+        except Exception as e:
+            print(f"Error al cargar resumen: {e}")
+        
+        self.loading.visible = False
+        self.page.update()
+
+    def ver_detalle(self, id_entidad, nombre_entidad):
+        """Carga y muestra la tabla de detalles para una entidad específica"""
+        self.loading.visible = True
+        self.page.update()
+        
+        try:
+            params = {
+                "id_campana": self.dd_campana.value,
+                "id_cultivo": self.dd_cultivo.value,
+                "id_entidad": id_entidad
+            }
+            with httpx.Client() as client:
+                res = client.get(f"{API_URL}/api/despachos/detalle", params=params, timeout=15)
+                if res.status_code == 200:
+                    detalles = res.json()
+                    self.tabla_datos.rows = [
+                        ft.DataRow(cells=[
+                            ft.DataCell(ft.Text(d['fecha'], size=12)),
+                            ft.DataCell(ft.Text(d['lote'], size=12)),
+                            ft.DataCell(ft.Text(f"{d['neto']:,.0f}", size=12)),
+                            ft.DataCell(ft.Text(d['destino'], size=12)),
+                        ]) for d in detalles
+                    ]
+                    
+                    # Cambiar visibilidad de vistas
+                    self.view_resumen.visible = False
+                    self.view_detalle.visible = True
+                    self.view_detalle.controls = [
+                        ft.Row([
+                            ft.IconButton(ft.Icons.ARROW_BACK, on_click=lambda _: self.volver_al_resumen()),
+                            ft.Text(nombre_entidad, weight="bold", size=16, overflow=ft.TextOverflow.ELLIPSIS),
+                        ], alignment=ft.MainAxisAlignment.START),
+                        ft.Row([self.tabla_datos], scroll=ft.ScrollMode.AUTO)
+                    ]
+        except Exception as e:
+            print(f"Error al cargar detalle: {e}")
+            
+        self.loading.visible = False
+        self.page.update()
+
+    def volver_al_resumen(self):
+        self.view_resumen.visible = True
+        self.view_detalle.visible = False
+        self.page.update()
 
     def cargar_filtros(self):
         """Descarga los datos para los dropdowns desde la API"""
@@ -95,15 +178,14 @@ class DespachosScreen:
                         
                         ft.Divider(),
                         
-                        ft.Text("Resultados", size=16, weight="bold"),
-                        # El ListView permite que la tabla tenga scroll lateral/vertical
-                        ft.Column(
-                            controls=[
-                                ft.Row([self.tabla_datos], scroll=ft.ScrollMode.AUTO)
-                            ],
-                            scroll=ft.ScrollMode.AUTO,
-                            expand=True
-                        )
+                        # Contenedor dinámico de vistas
+                        ft.Column([
+                            self.view_resumen.apply_settings(controls=[
+                                ft.Text("Resumen por Entregado", size=16, weight="bold"),
+                                self.lv_resumen
+                            ]),
+                            self.view_detalle
+                        ], expand=True)
                     ], horizontal_alignment=ft.CrossAxisAlignment.START, expand=True)
                 )
             ]
