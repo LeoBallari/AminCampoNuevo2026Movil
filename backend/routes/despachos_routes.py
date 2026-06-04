@@ -62,33 +62,42 @@ def get_despachos_detalle():
     try:
         conn = obtener_conexion()
         cursor = conn.cursor()
-        # Usamos corchetes en todas las columnas para evitar conflictos con palabras reservadas
+        # Usamos Alias (AS) para que las llaves del JSON coincidan siempre
         query = """
-            SELECT T.[fecha], T.[nro_cp], T.[id_entregado], T.[ctg], T.[neto_origen],
+            SELECT T.[fecha], T.[nro_cp] AS cp, T.[ctg], T.[neto_origen] AS neto, 
+                E1.[razon_social] AS destino, E2.[razon_social] AS transporte, 
+                T.[pat_chasis] AS patente,
                 (CASE 
                     WHEN T.[estado_cp] = 'Certificada' THEN 'C'
                     WHEN T.[estado_cp] = 'Confirmada' THEN 'T/OK'
                     ELSE 'S/C'
                 END) as estado
             FROM v2.CartasPorte AS T
+            LEFT JOIN v2.Entidades AS E1 ON T.id_destino = E1.id_entidad
+            LEFT JOIN v2.Entidades AS E2 ON T.id_transportista = E2.id_entidad
             WHERE T.[id_campaña] = %s AND T.id_cultivo = %s AND T.id_entregado = %s
             ORDER BY T.fecha DESC
         """
         cursor.execute(query, (id_campana, id_cultivo, id_entidad))
         rows = cursor.fetchall()
+        
+        # Obtener nombres de columnas dinámicamente
+        columns = [column[0] for column in cursor.description]
         conn.close()
         
-        # Formateo seguro de resultados
         resultado = []
         for r in rows:
-            resultado.append({
-                "fecha": str(r[0]), 
-                "cp": str(r[1])[-5:] if r[1] else "", 
-                "entidad": r[2], 
-                "ctg": r[3], 
-                "neto": float(r[4]) if r[4] else 0, 
-                "estado": r[5]
-            })
+            # Creamos el diccionario uniendo nombres de columnas con valores
+            d = dict(zip(columns, r))
+            # Formateo de tipos
+            d['fecha'] = str(d['fecha'])
+            d['neto'] = float(d['neto']) if d['neto'] else 0
+            d['cp'] = str(d['cp']).strip() if d['cp'] else ""
+            d['destino'] = d['destino'].strip() if d['destino'] else "N/A"
+            d['transporte'] = d['transporte'].strip() if d['transporte'] else "N/A"
+            d['v'] = "2.0" # NUEVA VERSION
+            resultado.append(d)
+            
         return jsonify(resultado)
     except Exception as e:
         error_str = str(e)
@@ -96,5 +105,5 @@ def get_despachos_detalle():
         # Si el error persiste, devolvemos información extra para depurar
         return jsonify({
             "error": error_str, 
-            "info": "Verifique si existen Security Policies o Triggers en la DB que mencionen 'id_lote'"
+            "info": "Error en la consulta de detalle de cartas de porte"
         }), 500

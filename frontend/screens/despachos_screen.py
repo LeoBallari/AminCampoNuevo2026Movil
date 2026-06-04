@@ -1,6 +1,7 @@
 import flet as ft
 import threading
 import httpx
+import time
 from config import API_URL
 from ui_styles import UIStyles
 
@@ -24,10 +25,13 @@ class DespachosScreen:
                 ft.DataColumn(ft.Text("CP")),
                 ft.DataColumn(ft.Text("CTG")),
                 ft.DataColumn(ft.Text("KG")),
+                ft.DataColumn(ft.Text("DESTINO")),
+                ft.DataColumn(ft.Text("TRANSPORTE")),
+                ft.DataColumn(ft.Text("PATENTE")),
                 ft.DataColumn(ft.Text("ESTADO")),
             ],
             rows=[],
-            column_spacing=15,
+            column_spacing=20,
             heading_row_height=40,
         )
 
@@ -78,19 +82,24 @@ class DespachosScreen:
             params = {
                 "id_campana": self.dd_campana.value,
                 "id_cultivo": self.dd_cultivo.value,
-                "id_entidad": id_entidad
+                "id_entidad": id_entidad,
+                "t": time.time()  # Cache buster
             }
             with httpx.Client() as client:
                 res = client.get(f"{API_URL}/api/despachos/detalle", params=params, timeout=15)
                 if res.status_code == 200:
                     detalles = res.json()
+                    print(f"DEBUG DETALLE: {detalles[0] if detalles else 'Sin datos'}") # Ver qué llega
                     self.tabla_datos.rows = [
                         ft.DataRow(cells=[
-                            ft.DataCell(ft.Text(d['fecha'], size=11)),
-                            ft.DataCell(ft.Text(str(d['cp'])[-5:] if d['cp'] else "", size=11)),
-                            ft.DataCell(ft.Text(d['ctg'], size=11)),
-                            ft.DataCell(ft.Text(f"{d['neto']:,.0f}", size=12)),
-                            ft.DataCell(ft.Text(d['estado'], size=12, weight="bold")),
+                            ft.DataCell(ft.Text(d.get('fecha', ''), size=11)),
+                            ft.DataCell(ft.Text(str(d.get('cp', ''))[-5:] if d.get('cp') else "", size=11)),
+                            ft.DataCell(ft.Text(d.get('ctg', ''), size=11)),
+                            ft.DataCell(ft.Text(f"{d.get('neto', 0):,.0f}", size=12)),
+                            ft.DataCell(ft.Text(d.get('destino', 'N/A'), size=11)),
+                            ft.DataCell(ft.Text(d.get('transporte', 'N/A'), size=11)),
+                            ft.DataCell(ft.Text(d.get('patente', ''), size=11)),
+                            ft.DataCell(ft.Text(d.get('estado', '-'), size=12, weight="bold")),
                         ]) for d in detalles
                     ]
                     
@@ -102,9 +111,12 @@ class DespachosScreen:
                     if detalles:
                         # Envolvemos la tabla en un Row con scroll para permitir desplazamiento horizontal
                         detalle_controls.append(
-                            ft.Row(
-                                [self.tabla_datos],
-                                scroll=ft.ScrollMode.AUTO,
+                            ft.Container(
+                                content=ft.Row(
+                                    [self.tabla_datos],
+                                    scroll=ft.ScrollMode.AUTO,
+                                ),
+                                padding=ft.padding.only(bottom=20)
                             )
                         )
                     else:
