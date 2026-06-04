@@ -66,12 +66,7 @@ def get_despachos_detalle():
         query = """
             SELECT T.[fecha], T.[nro_cp] AS cp, T.[ctg], T.[neto_origen] AS neto, 
                 E1.[razon_social] AS destino, E2.[razon_social] AS transporte, 
-                T.[pat_chasis] AS patente,
-                (CASE 
-                    WHEN T.[estado_cp] = 'Certificada' THEN 'C'
-                    WHEN T.[estado_cp] = 'Confirmada' THEN 'T/OK'
-                    ELSE 'S/C'
-                END) as estado
+                T.[pat_chasis] AS patente, T.[estado_cp] as estado
             FROM v2.CartasPorte AS T
             LEFT JOIN v2.Entidades AS E1 ON T.id_destino = E1.id_entidad
             LEFT JOIN v2.Entidades AS E2 ON T.id_transportista = E2.id_entidad
