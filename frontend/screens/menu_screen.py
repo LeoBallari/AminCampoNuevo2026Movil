@@ -28,9 +28,7 @@ class MenuScreen:
             
         def handle_cosecha(e):
             """Maneja click en Cosecha"""
-            # El sistema de navegación nativo ahora se dispara así:
-            # self.page.go("/cosecha")
-            print("Navegando a Cosecha")
+            self.page.go("/cosecha")
             
         def handle_estadisticas(e):
             """Maneja click en Reportes"""
