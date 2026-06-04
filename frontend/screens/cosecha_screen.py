@@ -16,20 +16,6 @@ class CosechaScreen:
         
         # Texto dinámico para el footer
         self.txt_total_footer = ft.Text("0 qq", color=ft.Colors.WHITE, weight="bold")
-        
-        self.tabla_datos = ft.DataTable(
-            columns=[
-                ft.DataColumn(ft.Text("BLQUE")),
-                ft.DataColumn(ft.Text("ESTADIO")),
-                ft.DataColumn(ft.Text("VARIEDAD")),
-                ft.DataColumn(ft.Text("RINDE")),
-                ft.DataColumn(ft.Text("HUMEDAD")),
-                ft.DataColumn(ft.Text("HAS")),
-            ],
-            rows=[],
-            column_spacing=20,
-            heading_row_height=40,
-        )
 
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""
@@ -51,20 +37,63 @@ class CosechaScreen:
                     # Calcular Totales para el Resumen del Resumen
                     total_qq = sum(float(item.get('rinde', 0)) * float(item.get('has', 0)) for item in datos)
                     self.txt_total_footer.value = f"{total_qq:,.0f} qq"
-                    
+
+                    # --- AGRUPAMIENTO POR ESTADIO ---
+                    grupos = {}
                     for item in datos:
+                        est = item.get('estadio', 'SIN CLASIFICAR').upper()
+                        if est not in grupos:
+                            grupos[est] = []
+                        grupos[est].append(item)
+
+                    # Construir la UI por cada grupo
+                    for estadio, items in grupos.items():
+                        # Título del Grupo (PRIMERA / SEGUNDA)
                         self.lv_resumen.controls.append(
-                            ft.ListTile(
-                                title=ft.Text(f"{item['bloque']} - {item['variedad']}", weight="bold"),
-                                subtitle=ft.Text(
-                                    f"Rinde: {float(item.get('rinde', 0)):.1f} qq/ha - "
-                                    f"Hum: {float(item.get('humedad', 0)):.1f}%"
-                                ),
-                                trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
-                                bgcolor=ft.Colors.BLUE_GREY_50,
-                                on_click=lambda e: print("Detalle no implementado")
+                            ft.Container(
+                                content=ft.Text(f"COSECHA DE {estadio}", weight="bold", color=ft.Colors.BLUE_700),
+                                margin=ft.margin.only(top=10, bottom=5)
                             )
                         )
+
+                        # Crear Filas de la Tabla para este grupo
+                        filas_tabla = []
+                        subtotal_qq = 0
+                        for it in items:
+                            rinde = float(it.get('rinde', 0))
+                            has = float(it.get('has', 0))
+                            subtotal_qq += (rinde * has)
+                            
+                            filas_tabla.append(ft.DataRow(cells=[
+                                ft.DataCell(ft.Text(it['bloque'], size=12)),
+                                ft.DataCell(ft.Text(it.get('variedad', 'S/V'), size=11)),
+                                ft.DataCell(ft.Text(f"{rinde:.1f}", size=12, weight="bold")),
+                                ft.DataCell(ft.Text(f"{float(it.get('humedad', 0)):.1f}%", size=12)),
+                                ft.DataCell(ft.Text(f"{has:.1f}", size=12)),
+                            ]))
+
+                        # Crear la Tabla (Grilla)
+                        tabla = ft.DataTable(
+                            columns=[
+                                ft.DataColumn(ft.Text("Lote", size=12)),
+                                ft.DataColumn(ft.Text("Variedad", size=12)),
+                                ft.DataColumn(ft.Text("Rinde", size=12)),
+                                ft.DataColumn(ft.Text("Hum", size=12)),
+                                ft.DataColumn(ft.Text("Has", size=12)),
+                            ],
+                            rows=filas_tabla,
+                            column_spacing=15,
+                            heading_row_height=35,
+                            data_row_min_height=35,
+                        )
+
+                        # Envolver tabla en un scroll horizontal por si la pantalla es chica
+                        self.lv_resumen.controls.append(ft.Row([tabla], scroll=ft.ScrollMode.AUTO))
+                        
+                        # Resumen del grupo
+                        self.lv_resumen.controls.append(ft.Text(f"Subtotal {estadio}: {subtotal_qq:,.0f} qq", size=12, italic=True, color=ft.Colors.BLUE_GREY_400))
+                        self.lv_resumen.controls.append(ft.Divider(height=10, thickness=1))
+
         except Exception as e:
             print(f"Error al cargar resumen: {e}")
         
