@@ -49,7 +49,7 @@ class CosechaScreen:
                 if res.status_code == 200:
                     datos = res.json()
                     # Calcular Totales para el Resumen del Resumen
-                    total_qq = sum(item['rinde'] * item['has'] for item in datos)
+                    total_qq = sum(float(item.get('rinde', 0)) * float(item.get('has', 0)) for item in datos)
                     self.txt_total_footer.value = f"{total_qq:,.0f} qq"
                     
                     for item in datos:

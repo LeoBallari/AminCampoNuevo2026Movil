@@ -86,7 +86,13 @@ def get_cosecha_resumen():
         cursor.execute(query, (id_campana, id_cultivo))
         rows = cursor.fetchall()
         conn.close()
-        return jsonify([{"bloque": r[0], "estadio": r[1], "variedad": r[2], "rinde": r[3], "humedad": r[4], "has": float(r[5])} 
-                        for r in rows])
+        return jsonify([{
+            "bloque": r[0],
+            "estadio": r[1],
+            "variedad": r[2] if r[2] else "S/V",
+            "rinde": float(r[3]) if r[3] is not None else 0.0,
+            "humedad": float(r[4]) if r[4] is not None else 0.0,
+            "has": float(r[5]) if r[5] is not None else 0.0
+        } for r in rows])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
