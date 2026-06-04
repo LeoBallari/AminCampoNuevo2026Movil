@@ -62,25 +62,39 @@ def get_despachos_detalle():
     try:
         conn = obtener_conexion()
         cursor = conn.cursor()
+        # Usamos corchetes en todas las columnas para evitar conflictos con palabras reservadas
         query = """
-            SELECT CP.Fecha,CP.nro_cp,CP.id_entregado, CP.ctg, CP.neto_origen,
-                CASE 
-                    WHEN CP.estado_cp = 'Certificada' THEN 'C'
-                    WHEN CP.estado_cp = 'Confirmada' THEN 'T/OK'
+            SELECT T.[fecha], T.[nro_cp], T.[id_entregado], T.[ctg], T.[neto_origen],
+                (CASE 
+                    WHEN T.[estado_cp] = 'Certificada' THEN 'C'
+                    WHEN T.[estado_cp] = 'Confirmada' THEN 'T/OK'
                     ELSE 'S/C'
-                END
-            FROM v2.CartasPorte CP
-            WHERE CP.[id_campaña] = %s AND CP.id_cultivo = %s AND CP.id_entregado = %s
-            ORDER BY CP.fecha DESC
+                END) as estado
+            FROM v2.CartasPorte AS T
+            WHERE T.[id_campaña] = %s AND T.id_cultivo = %s AND T.id_entregado = %s
+            ORDER BY T.fecha DESC
         """
-        # Debug Extremo: Imprimir la query completa para ver si alguien inyectó id_lote
-        full_query = query % (id_campana, id_cultivo, id_entidad)
-        print(f"DEBUG QUERY: {full_query}")
-        
         cursor.execute(query, (id_campana, id_cultivo, id_entidad))
         rows = cursor.fetchall()
         conn.close()
-        return jsonify([{"fecha": r[0], "cp": r[1], "entidad": r[2], "ctg": r[3], "neto": float(r[4]), "estado": r[5]} for r in rows])
+        
+        # Formateo seguro de resultados
+        resultado = []
+        for r in rows:
+            resultado.append({
+                "fecha": str(r[0]), 
+                "cp": str(r[1])[-5:] if r[1] else "", 
+                "entidad": r[2], 
+                "ctg": r[3], 
+                "neto": float(r[4]) if r[4] else 0, 
+                "estado": r[5]
+            })
+        return jsonify(resultado)
     except Exception as e:
-        print(f"ERROR CRITICO: {str(e)}")
-        return jsonify({"error": str(e), "query_ejecutada": query}), 500
+        error_str = str(e)
+        print(f"ERROR CRITICO EN DETALLE: {error_str}")
+        # Si el error persiste, devolvemos información extra para depurar
+        return jsonify({
+            "error": error_str, 
+            "info": "Verifique si existen Security Policies o Triggers en la DB que mencionen 'id_lote'"
+        }), 500

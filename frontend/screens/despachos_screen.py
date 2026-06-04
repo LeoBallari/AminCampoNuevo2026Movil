@@ -20,11 +20,11 @@ class DespachosScreen:
         
         self.tabla_datos = ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text("Fecha")),
+                ft.DataColumn(ft.Text("FECHA")),
                 ft.DataColumn(ft.Text("CP")),
                 ft.DataColumn(ft.Text("CTG")),
-                ft.DataColumn(ft.Text("Kg")),
-                ft.DataColumn(ft.Text("Est.")),
+                ft.DataColumn(ft.Text("KG")),
+                ft.DataColumn(ft.Text("ESTADO")),
             ],
             rows=[],
             column_spacing=15,
@@ -87,7 +87,7 @@ class DespachosScreen:
                     self.tabla_datos.rows = [
                         ft.DataRow(cells=[
                             ft.DataCell(ft.Text(d['fecha'], size=11)),
-                            ft.DataCell(ft.Text(d['cp'], size=11)),
+                            ft.DataCell(ft.Text(str(d['cp'])[-5:] if d['cp'] else "", size=11)),
                             ft.DataCell(ft.Text(d['ctg'], size=11)),
                             ft.DataCell(ft.Text(f"{d['neto']:,.0f}", size=12)),
                             ft.DataCell(ft.Text(d['estado'], size=12, weight="bold")),
@@ -100,11 +100,10 @@ class DespachosScreen:
                     ]
 
                     if detalles:
+                        # Envolvemos la tabla en un Row con scroll para permitir desplazamiento horizontal
                         detalle_controls.append(
-                            ft.Container(
-                                expand=True,
-                                content=self.tabla_datos,
-                                padding=ft.padding.only(bottom=10),
+                            ft.Row(
+                                [self.tabla_datos],
                                 scroll=ft.ScrollMode.AUTO,
                             )
                         )
@@ -136,6 +135,7 @@ class DespachosScreen:
                         ),
                         controls=[
                             ft.Container(
+                                expand=True,
                                 padding=20,
                                 content=ft.Column(
                                     detalle_controls,
@@ -175,6 +175,7 @@ class DespachosScreen:
                         ),
                         controls=[
                             ft.Container(
+                                expand=True,
                                 padding=20,
                                 content=ft.Column([
                                     ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
@@ -214,6 +215,7 @@ class DespachosScreen:
                 ),
                 controls=[
                     ft.Container(
+                        expand=True,
                         padding=20,
                         content=ft.Column([
                             ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
