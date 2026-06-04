@@ -1,2 +1,11 @@
+product: "Campo Movil 2026"
+org: "com.tuempresa.campomovil"
+
 android:
-ndk_version: "26.1.10909125"
+  ndk_version: "26.1.10909125"
+  icon: "assets/iconos/logo_reportes.png"
+  fullscreen: true
+
+flutter:
+  assets:
+    - assets/

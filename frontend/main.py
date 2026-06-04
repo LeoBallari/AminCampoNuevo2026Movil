@@ -30,7 +30,7 @@ class App:
         self.page.window.resizable = False
         # Icono para la ventana de escritorio
         self.page.window.icon = os.path.join("assets", "icon.png")
-        
+     
         # Asignar eventos de navegación
         self.page.on_route_change = self.on_route_change
         self.page.on_view_pop = self.on_view_pop
