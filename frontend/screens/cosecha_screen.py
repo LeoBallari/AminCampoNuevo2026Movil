@@ -56,7 +56,10 @@ class CosechaScreen:
                         self.lv_resumen.controls.append(
                             ft.ListTile(
                                 title=ft.Text(f"{item['bloque']} - {item['variedad']}", weight="bold"),
-                                subtitle=ft.Text(f"Rinde: {item['rinde']:.1f} qq/ha - Hum: {item['humedad']:.1f}%"),
+                                subtitle=ft.Text(
+                                    f"Rinde: {float(item.get('rinde', 0)):.1f} qq/ha - "
+                                    f"Hum: {float(item.get('humedad', 0)):.1f}%"
+                                ),
                                 trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
                                 bgcolor=ft.Colors.BLUE_GREY_50,
                                 on_click=lambda e: print("Detalle no implementado")
