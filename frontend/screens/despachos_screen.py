@@ -89,16 +89,15 @@ class DespachosScreen:
                 res = client.get(f"{API_URL}/api/despachos/detalle", params=params, timeout=15)
                 if res.status_code == 200:
                     detalles = res.json()
-                    print(f"DEBUG DETALLE: {detalles[0] if detalles else 'Sin datos'}") # Ver qué llega
                     self.tabla_datos.rows = [
                         ft.DataRow(cells=[
-                            ft.DataCell(ft.Text(d.get('fecha', ''), size=11)),
-                            ft.DataCell(ft.Text(str(d.get('cp', ''))[-5:] if d.get('cp') else "", size=11)),
-                            ft.DataCell(ft.Text(d.get('ctg', ''), size=11)),
+                            ft.DataCell(ft.Text(d.get('fecha', ''), size=12)),
+                            ft.DataCell(ft.Text(str(d.get('cp', ''))[-5:] if d.get('cp') else "", size=12)),
+                            ft.DataCell(ft.Text(d.get('ctg', ''), size=12)),
                             ft.DataCell(ft.Text(f"{d.get('neto', 0):,.0f}", size=12)),
-                            ft.DataCell(ft.Text(d.get('destino', 'N/A'), size=11)),
-                            ft.DataCell(ft.Text(d.get('transporte', 'N/A'), size=11)),
-                            ft.DataCell(ft.Text(d.get('patente', ''), size=11)),
+                            ft.DataCell(ft.Text(d.get('destino', 'N/A'), size=12)),
+                            ft.DataCell(ft.Text(d.get('transporte', 'N/A'), size=12)),
+                            ft.DataCell(ft.Text(d.get('patente', ''), size=12)),
                             ft.DataCell(ft.Text(d.get('estado', '-'), size=12, weight="bold")),
                         ]) for d in detalles
                     ]
@@ -148,7 +147,7 @@ class DespachosScreen:
                         controls=[
                             ft.Container(
                                 expand=True,
-                                padding=20,
+                                padding=ft.padding.only(left=10, right=10, top=15, bottom=10),
                                 content=ft.Column(
                                     detalle_controls,
                                     scroll=ft.ScrollMode.AUTO,
@@ -188,7 +187,7 @@ class DespachosScreen:
                         controls=[
                             ft.Container(
                                 expand=True,
-                                padding=20,
+                                padding=10,
                                 content=ft.Column([
                                     ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
                                     ft.Divider(),
@@ -228,7 +227,7 @@ class DespachosScreen:
                 controls=[
                     ft.Container(
                         expand=True,
-                        padding=20,
+                        padding=10,
                         content=ft.Column([
                             ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
                             ft.Divider(),
@@ -282,9 +281,9 @@ class DespachosScreen:
     def show(self):
         """Retorna la vista de Despachos"""
         
-        # Iniciamos la carga de datos en un hilo separado
-        # para que la pantalla abra instantáneamente
-        threading.Thread(target=self.cargar_filtros, daemon=True).start()
+        # Solo cargamos filtros si la lista está vacía (evita perder selección al volver)
+        if not self.dd_campana.options:
+            threading.Thread(target=self.cargar_filtros, daemon=True).start()
 
         return ft.View(
             route="/despachos",
@@ -298,7 +297,7 @@ class DespachosScreen:
                 self.loading,
                 ft.Container(
                     expand=True,
-                    padding=ft.padding.only(left=20, right=20, top=10, bottom=0),
+                    padding=ft.padding.only(left=10, right=10, top=10, bottom=0),
                     content=ft.Column([
                         ft.Text("Filtros de Búsqueda", size=16, weight="bold"),
                         ft.Row([

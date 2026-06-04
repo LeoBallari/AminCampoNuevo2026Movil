@@ -21,6 +21,7 @@ class App:
             sys.path.append(BASE_DIR)
             
         self.usuario_actual = None
+        self.despachos_screen = None  # Cache para persistir el estado
         
         # Configurar página usando la sintaxis moderna para Windows
         self.page.title = APP_TITLE
@@ -46,6 +47,7 @@ class App:
     def on_logout(self):
         """Callback cuando el usuario se desconecta"""
         self.usuario_actual = None
+        self.despachos_screen = None # Limpiar cache al salir
         self.page.go("/")
         
     def on_route_change(self, e):
@@ -69,8 +71,10 @@ class App:
             self.page.views.append(ConfigScreen(self.page).show())
         
         elif self.page.route == "/despachos":
-            from screens.despachos_screen import DespachosScreen
-            self.page.views.append(DespachosScreen(self.page).show())
+            if not self.despachos_screen:
+                from screens.despachos_screen import DespachosScreen
+                self.despachos_screen = DespachosScreen(self.page)
+            self.page.views.append(self.despachos_screen.show())
 
         elif self.page.route == "/despachos/detalle":
             # La vista de detalle ya se construye desde DespachosScreen.

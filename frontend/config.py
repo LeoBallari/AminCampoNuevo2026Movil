@@ -13,7 +13,7 @@ API_TIMEOUT = 60.0
 
 # Configuración de ventana
 WINDOW_WIDTH = 380
-WINDOW_HEIGHT = 680
+WINDOW_HEIGHT = 800
 
 # Temas
 APP_TITLE = "Campo Movil 2026"
