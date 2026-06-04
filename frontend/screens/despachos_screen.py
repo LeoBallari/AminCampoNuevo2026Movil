@@ -18,23 +18,13 @@ class DespachosScreen:
         # Texto dinámico para el footer
         self.txt_total_footer = ft.Text("0 qq  --  0 despachos", color=ft.Colors.WHITE, weight="bold")
         
-        # Contenedores para alternar vistas
-        self.view_resumen = ft.Column(
-            controls=[
-                ft.Text("Resumen por Entregado", size=16, weight="bold"),
-                self.lv_resumen
-            ],
-            visible=True, 
-            expand=True
-        )
-        self.view_detalle = ft.Column(visible=False, expand=True)
-        
         self.tabla_datos = ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text("Fec.")),
-                ft.DataColumn(ft.Text("Lote")),
+                ft.DataColumn(ft.Text("Fecha")),
+                ft.DataColumn(ft.Text("CP")),
+                ft.DataColumn(ft.Text("CTG")),
                 ft.DataColumn(ft.Text("Kg")),
-                ft.DataColumn(ft.Text("Dest.")),
+                ft.DataColumn(ft.Text("Est.")),
             ],
             rows=[],
             column_spacing=15,
@@ -44,8 +34,6 @@ class DespachosScreen:
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""
         if self.dd_campana.value and self.dd_cultivo.value:
-            self.view_resumen.visible = True
-            self.view_detalle.visible = False
             threading.Thread(target=self.cargar_resumen, daemon=True).start()
 
     def cargar_resumen(self):
@@ -98,33 +86,153 @@ class DespachosScreen:
                     detalles = res.json()
                     self.tabla_datos.rows = [
                         ft.DataRow(cells=[
-                            ft.DataCell(ft.Text(d['fecha'], size=12)),
-                            ft.DataCell(ft.Text(d['lote'], size=12)),
+                            ft.DataCell(ft.Text(d['fecha'], size=11)),
+                            ft.DataCell(ft.Text(d['cp'], size=11)),
+                            ft.DataCell(ft.Text(d['ctg'], size=11)),
                             ft.DataCell(ft.Text(f"{d['neto']:,.0f}", size=12)),
-                            ft.DataCell(ft.Text(d['destino'], size=12)),
+                            ft.DataCell(ft.Text(d['estado'], size=12, weight="bold")),
                         ]) for d in detalles
                     ]
                     
-                    # Cambiar visibilidad de vistas
-                    self.view_resumen.visible = False
-                    self.view_detalle.visible = True
-                    self.view_detalle.controls = [
-                        ft.Row([
-                            ft.IconButton(ft.Icons.ARROW_BACK, on_click=lambda _: self.volver_al_resumen()),
-                            ft.Text(nombre_entidad, weight="bold", size=16, overflow=ft.TextOverflow.ELLIPSIS),
-                        ], alignment=ft.MainAxisAlignment.START),
-                        ft.Row([self.tabla_datos], scroll=ft.ScrollMode.AUTO)
+                    detalle_controls = [
+                        ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
+                        ft.Divider(),
                     ]
+
+                    if detalles:
+                        detalle_controls.append(
+                            ft.Container(
+                                expand=True,
+                                content=self.tabla_datos,
+                                padding=ft.padding.only(bottom=10),
+                                scroll=ft.ScrollMode.AUTO,
+                            )
+                        )
+                    else:
+                        detalle_controls.append(
+                            ft.Container(
+                                padding=20,
+                                content=ft.Text(
+                                    "No se encontraron despachos para esta entidad.",
+                                    color=ft.Colors.BLUE_GREY_700,
+                                    size=14,
+                                )
+                            )
+                        )
+
+                    detalle_view = ft.View(
+                        route="/despachos/detalle",
+                        appbar=UIStyles.get_appbar(
+                            "Detalle de despachos",
+                            leading=ft.IconButton(
+                                icon=ft.Icons.ARROW_BACK,
+                                icon_color=ft.Colors.WHITE,
+                                on_click=lambda _: (
+                                    self.page.views.pop(), 
+                                    setattr(self.page, "route", "/despachos"),
+                                    self.page.update()
+                                )
+                            )
+                        ),
+                        controls=[
+                            ft.Container(
+                                padding=20,
+                                content=ft.Column(
+                                    detalle_controls,
+                                    scroll=ft.ScrollMode.AUTO,
+                                    expand=True
+                                )
+                            )
+                        ]
+                    )
+                    self.page.views.append(detalle_view)
+                    self.page.go("/despachos/detalle")
+                    self.page.update()
+                else:
+                    print(f"Error API: {res.text}") # Debug en consola
+                    try:
+                        error_msg = res.json().get("error", res.text)
+                    except Exception:
+                        error_msg = res.text
+                    self.page.snack_bar = ft.SnackBar(
+                        ft.Text(f"Error cargando detalle: {error_msg}", size=12),
+                        bgcolor=ft.Colors.RED_600,
+                        open=True,
+                    )
+                    error_view = ft.View(
+                        route="/despachos/detalle",
+                        appbar=UIStyles.get_appbar(
+                            "Detalle de despachos",
+                            leading=ft.IconButton(
+                                icon=ft.Icons.ARROW_BACK,
+                                icon_color=ft.Colors.WHITE,
+                                on_click=lambda _: (
+                                    self.page.views.pop(),
+                                    setattr(self.page, "route", "/despachos"),
+                                    self.page.update()
+                                )
+                            )
+                        ),
+                        controls=[
+                            ft.Container(
+                                padding=20,
+                                content=ft.Column([
+                                    ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
+                                    ft.Divider(),
+                                    ft.Text(
+                                        f"No se pudo cargar el detalle: {error_msg}",
+                                        color=ft.Colors.RED_700,
+                                        size=14,
+                                    )
+                                ], scroll=ft.ScrollMode.AUTO, expand=True)
+                            )
+                        ]
+                    )
+                    self.page.views.append(error_view)
+                    self.page.go("/despachos/detalle")
+                    self.page.update()
         except Exception as e:
             print(f"Error al cargar detalle: {e}")
-            
-        self.loading.visible = False
-        self.page.update()
-
-    def volver_al_resumen(self):
-        self.view_resumen.visible = True
-        self.view_detalle.visible = False
-        self.page.update()
+            self.page.snack_bar = ft.SnackBar(
+                ft.Text(f"Error cargando detalle: {e}", size=12),
+                bgcolor=ft.Colors.RED_600,
+                open=True,
+            )
+            error_view = ft.View(
+                route="/despachos/detalle",
+                appbar=UIStyles.get_appbar(
+                    "Detalle de despachos",
+                    leading=ft.IconButton(
+                        icon=ft.Icons.ARROW_BACK,
+                        icon_color=ft.Colors.WHITE,
+                        on_click=lambda _: (
+                            self.page.views.pop(),
+                            setattr(self.page, "route", "/despachos"),
+                            self.page.update()
+                        )
+                    )
+                ),
+                controls=[
+                    ft.Container(
+                        padding=20,
+                        content=ft.Column([
+                            ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
+                            ft.Divider(),
+                            ft.Text(
+                                f"No se pudo cargar el detalle: {e}",
+                                color=ft.Colors.RED_700,
+                                size=14,
+                            )
+                        ], scroll=ft.ScrollMode.AUTO, expand=True)
+                    )
+                ]
+            )
+            self.page.views.append(error_view)
+            self.page.go("/despachos/detalle")
+            self.page.update()
+        finally:
+            self.loading.visible = False
+            self.page.update()
 
     def cargar_filtros(self):
         """Descarga los datos para los dropdowns desde la API"""
@@ -187,11 +295,9 @@ class DespachosScreen:
                         ft.Divider(),
                         
                         # Contenedor dinámico de vistas
-                        ft.Column([
-                            self.view_resumen,
-                            self.view_detalle
-                        ], expand=True, scroll=ft.ScrollMode.AUTO)
-                    ], 
+                        ft.Text("Resumen por Entregado", size=16, weight="bold"),
+                        self.lv_resumen
+                    ],
                     horizontal_alignment=ft.CrossAxisAlignment.START,
                     expand=True)
                 ),

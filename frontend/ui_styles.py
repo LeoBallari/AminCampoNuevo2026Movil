@@ -25,7 +25,7 @@ class UIStyles:
         return ft.Container(
             content=content,
             bgcolor=ft.Colors.BLUE_GREY_900,
-            padding=ft.padding.only(left=20, right=20, top=15, bottom=50),
+            padding=ft.padding.only(left=20, right=20, top=15, bottom=60),
             border_radius=ft.border_radius.only(top_left=20, top_right=20),
             shadow=ft.BoxShadow(
                 blur_radius=10, color=ft.Colors.with_opacity(0.3, "black")

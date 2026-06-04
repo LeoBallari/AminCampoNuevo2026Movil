@@ -1,7 +1,6 @@
-from flask import Blueprint, jsonify, request
-from database import obtener_conexion  # Importamos tu conexión central
+from flask import Blueprint, request, jsonify
+from database import obtener_conexion
 
-# Creamos el plano/Blueprint para la autenticación
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/api/login', methods=['POST'])
@@ -14,7 +13,7 @@ def login():
         conn = obtener_conexion()
         cursor = conn.cursor()
         
-        # Mantiene tu consulta exacta de verificación de usuario
+        # Consulta para verificar el usuario
         query = "SELECT COUNT(*) FROM v2.Usuarios WHERE usuario = %s AND contraseña = %s"
         cursor.execute(query, (user_input, pass_input))
         exists = cursor.fetchone()[0]

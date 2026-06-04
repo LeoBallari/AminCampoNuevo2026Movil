@@ -30,7 +30,10 @@ class App:
         self.page.window.resizable = False
         # Icono para la ventana de escritorio
         self.page.window.icon = os.path.join("assets", "icon.png")
-     
+
+        if self.page.platform == ft.PagePlatform.ANDROID:
+            self.page.window.full_screen = True
+        
         # Asignar eventos de navegación
         self.page.on_route_change = self.on_route_change
         self.page.on_view_pop = self.on_view_pop
@@ -47,7 +50,10 @@ class App:
         
     def on_route_change(self, e):
         """Manejador central de cambios de pantalla"""
-        self.page.views.clear()
+        # No limpiamos la pila si vamos al detalle, para permitir que se apile
+        # sobre la pantalla de despachos principal.
+        if self.page.route != "/despachos/detalle":
+            self.page.views.clear()
         
         # 1. Pantalla de Login
         if self.page.route == "/":
@@ -65,7 +71,12 @@ class App:
         elif self.page.route == "/despachos":
             from screens.despachos_screen import DespachosScreen
             self.page.views.append(DespachosScreen(self.page).show())
-            
+
+        elif self.page.route == "/despachos/detalle":
+            # La vista de detalle ya se construye desde DespachosScreen.
+            # No agregamos una nueva vista aquí para evitar duplicados.
+            pass
+
         self.page.update()
         
     def on_view_pop(self, e):
