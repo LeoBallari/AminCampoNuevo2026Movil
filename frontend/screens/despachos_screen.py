@@ -22,7 +22,7 @@ class DespachosScreen:
 
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""
-        print(f"Filtrando por: {self.dd_campana.value} - {self.dd_cultivo.value}")
+        print(f"Filtrando por IDs -> Campaña: {self.dd_campana.value}, Cultivo: {self.dd_cultivo.value}")
         # Aquí llamaremos a la función de cargar tabla más adelante
 
     def cargar_filtros(self):
@@ -33,16 +33,22 @@ class DespachosScreen:
         try:
             with httpx.Client() as client:
                 # Cargar Campañas
-                res_camp = client.get(f"{API_URL}/api/campanas", timeout=10)
+                res_camp = client.get(f"{API_URL}/api/campañas", timeout=10)
                 if res_camp.status_code == 200:
                     campanas = res_camp.json()
-                    self.dd_campana.options = [ft.dropdown.Option(c) for c in campanas]
+                    # Usamos 'key' para el ID y 'text' para lo que se muestra
+                    self.dd_campana.options = [
+                        ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in campanas
+                    ]
                 
                 # Cargar Cultivos
                 res_cult = client.get(f"{API_URL}/api/cultivos", timeout=10)
                 if res_cult.status_code == 200:
                     cultivos = res_cult.json()
-                    self.dd_cultivo.options = [ft.dropdown.Option(c) for c in cultivos]
+                    # Lo mismo para cultivos
+                    self.dd_cultivo.options = [
+                        ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in cultivos
+                    ]
 
         except Exception as e:
             print(f"Error cargando filtros: {e}")

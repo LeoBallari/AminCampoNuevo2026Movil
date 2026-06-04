@@ -60,11 +60,12 @@ def get_campanas():
     try:
         conn = obtener_conexion()
         cursor = conn.cursor()
-        # Ajusta el nombre de la tabla según tu base de datos
-        cursor.execute("SELECT DISTINCT nombre FROM v2.Campañas ORDER BY nombre DESC")
+        # Traemos el ID y el Nombre
+        cursor.execute("SELECT id_campaña, nombre FROM v2.Campañas ORDER BY nombre DESC")
         rows = cursor.fetchall()
         conn.close()
-        return jsonify([row[0] for row in rows])
+        # Devolvemos una lista de diccionarios
+        return jsonify([{"id": row[0], "nombre": row[1]} for row in rows])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -73,11 +74,12 @@ def get_cultivos():
     try:
         conn = obtener_conexion()
         cursor = conn.cursor()
-        # Ajusta el nombre de la tabla según tu base de datos
-        cursor.execute("SELECT DISTINCT nombre_cultivo FROM v2.Cultivos ORDER BY nombre_cultivo")
+        # Traemos el ID y el Nombre
+        cursor.execute("SELECT id_cultivo, nombre_cultivo FROM v2.Cultivos ORDER BY nombre_cultivo")
         rows = cursor.fetchall()
         conn.close()
-        return jsonify([row[0] for row in rows])
+        # Devolvemos una lista de diccionarios
+        return jsonify([{"id": row[0], "nombre": row[1]} for row in rows])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
