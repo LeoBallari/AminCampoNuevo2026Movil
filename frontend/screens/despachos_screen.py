@@ -2,6 +2,9 @@ import flet as ft
 import threading
 import httpx
 from config import API_URL
+from ui_styles import UIStyles
+
+
 
 class DespachosScreen:
     def __init__(self, page: ft.Page):
@@ -12,8 +15,18 @@ class DespachosScreen:
         self.loading = ft.ProgressBar(visible=False, color=ft.Colors.BLUE_400)
         self.lv_resumen = ft.ListView(expand=True, spacing=10, padding=10)
         
+        # Texto dinámico para el footer
+        self.txt_total_footer = ft.Text("0 qq  --  0 despachos", color=ft.Colors.WHITE, weight="bold")
+        
         # Contenedores para alternar vistas
-        self.view_resumen = ft.Column(visible=True, expand=True)
+        self.view_resumen = ft.Column(
+            controls=[
+                ft.Text("Resumen por Entregado", size=16, weight="bold"),
+                self.lv_resumen
+            ],
+            visible=True, 
+            expand=True
+        )
         self.view_detalle = ft.Column(visible=False, expand=True)
         
         self.tabla_datos = ft.DataTable(
@@ -47,6 +60,11 @@ class DespachosScreen:
                 res = client.get(f"{API_URL}/api/despachos/resumen", params=params, timeout=15)
                 if res.status_code == 200:
                     datos = res.json()
+                    # Calcular Totales para el Resumen del Resumen
+                    total_qq = sum(item['qq'] for item in datos)
+                    total_cant = sum(item['cantidad'] for item in datos)
+                    self.txt_total_footer.value = f"{total_qq:,.0f} qq   --   {total_cant} despachos"
+                    
                     for item in datos:
                         self.lv_resumen.controls.append(
                             ft.ListTile(
@@ -148,27 +166,17 @@ class DespachosScreen:
 
         return ft.View(
             route="/despachos",
-            appbar=ft.AppBar(
-                leading=ft.Container(
-                    content=
-                        ft.IconButton(
-                            icon=ft.Icons.HOME,
-                            icon_color=ft.Colors.WHITE,
-                            on_click=lambda _: self.page.go("/menu")
-                        ),
-                    padding=5,
-                ),
-                title=ft.Text("Gestión de Despachos", size=20, weight="bold"),
-                bgcolor=ft.Colors.BLUE_GREY_900,
-                color=ft.Colors.WHITE,
-                center_title=False,
+            appbar=UIStyles.get_appbar(
+                "Gestión de Despachos", 
+                on_home_click=lambda _: self.page.go("/menu")
             ),
             vertical_alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
                 self.loading,
                 ft.Container(
-                    padding=20,
+                    expand=True,
+                    padding=ft.padding.only(left=20, right=20, top=10, bottom=0),
                     content=ft.Column([
                         ft.Text("Filtros de Búsqueda", size=16, weight="bold"),
                         ft.Row([
@@ -180,13 +188,19 @@ class DespachosScreen:
                         
                         # Contenedor dinámico de vistas
                         ft.Column([
-                            self.view_resumen.apply_settings(controls=[
-                                ft.Text("Resumen por Entregado", size=16, weight="bold"),
-                                self.lv_resumen
-                            ]),
+                            self.view_resumen,
                             self.view_detalle
-                        ], expand=True)
-                    ], horizontal_alignment=ft.CrossAxisAlignment.START, expand=True)
+                        ], expand=True, scroll=ft.ScrollMode.AUTO)
+                    ], 
+                    horizontal_alignment=ft.CrossAxisAlignment.START,
+                    expand=True)
+                ),
+                # Footer Estetico con el resumen de totales
+                UIStyles.get_footer_container(
+                    ft.Row([
+                        ft.Text("TOTAL GENERAL", color=ft.Colors.BLUE_200, size=12, weight="bold"),
+                        self.txt_total_footer
+                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                 )
             ]
         )

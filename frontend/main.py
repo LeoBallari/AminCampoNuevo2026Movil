@@ -3,8 +3,9 @@ Punto de entrada de la aplicación
 Aplicación móvil Campo 2026 - Login y Menú
 """
 import flet as ft
-from config import APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT
+from config import BASE_DIR, APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT
 from screens.login_screen import LoginScreen
+import sys
 from screens.menu_screen import MenuScreen
 from screens.config_screen import ConfigScreen
 import os
@@ -14,6 +15,11 @@ class App:
     
     def __init__(self, page: ft.Page):
         self.page = page
+        
+        # Asegurar que el directorio raíz de frontend esté en el path
+        if BASE_DIR not in sys.path:
+            sys.path.append(BASE_DIR)
+            
         self.usuario_actual = None
         
         # Configurar página usando la sintaxis moderna para Windows

@@ -4,6 +4,7 @@ Pantalla del Menú Principal
 import flet as ft
 import os
 from config import BASE_DIR
+from ui_styles import UIStyles
 
 class MenuScreen:
     """Pantalla del menú principal después del login"""
@@ -96,7 +97,8 @@ class MenuScreen:
         # === RETORNAMOS LA VISTA NATIVA ===
         return ft.View(
             route="/menu",
-            appbar=ft.AppBar(
+            appbar=UIStyles.get_appbar(
+                title="CAMPO MOVIL",
                 leading=ft.Container(
                     content=ft.Image(
                         src=os.path.join(BASE_DIR, "assets/imagenes/logo_reportes.png"),
@@ -104,10 +106,6 @@ class MenuScreen:
                     ),
                     padding=5,
                 ),
-                title=ft.Text("CAMPO MOVIL", size=20, weight="bold"),
-                bgcolor=ft.Colors.BLUE_GREY_900,
-                color=ft.Colors.WHITE,
-                center_title=False,
                 actions=[
                     ft.IconButton(ft.Icons.NOTIFICATIONS, icon_color=ft.Colors.WHITE, on_click=lambda _: print("Notificaciones")),
                     ft.IconButton(ft.Icons.LOGOUT, icon_color=ft.Colors.WHITE, on_click=handle_logout),
@@ -152,6 +150,7 @@ class MenuScreen:
                             ),
                         ],
                         spacing=10,
+                        expand=True,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         scroll=ft.ScrollMode.HIDDEN,
                     ),

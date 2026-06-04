@@ -1,1 +1,1 @@
-"""Screens package"""
+"""Package for reusable UI components"""
