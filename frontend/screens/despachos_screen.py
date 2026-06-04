@@ -198,7 +198,7 @@ class DespachosScreen:
                 # Footer Estetico con el resumen de totales
                 UIStyles.get_footer_container(
                     ft.Row([
-                        ft.Text("TOTAL GENERAL", color=ft.Colors.BLUE_200, size=12, weight="bold"),
+                        ft.Text("TOTAL GENERAL", color=ft.Colors.BLUE_200, size=13, weight="bold"),
                         self.txt_total_footer
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                 )
