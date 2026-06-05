@@ -179,7 +179,7 @@ class MenuScreen:
                 ),
                 # Footer Fijo
                 ft.Container(
-                    height=85,  # Aumentamos para compensar el área segura de Android
+                    height=100,  # Aumentamos para compensar el área segura de Android
                     bgcolor="surface", # Color adaptable al tema
                     padding=ft.padding.only(left=40, right=40, top=5, bottom=20),
                     border_radius=ft.border_radius.only(top_left=20, top_right=20),
