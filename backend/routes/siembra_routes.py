@@ -52,12 +52,15 @@ def get_siembra_resumen():
             LEFT JOIN v2.Bloques           B   ON BP.id_bloque            = B.id_bloque
             LEFT JOIN v2.Entidades         E   ON TS.id_entidad           = E.id_entidad
             LEFT JOIN v2.Maquinarias       M1  ON TS.id_maquinaria1       = M1.id_maquinaria
-            LEFT  JOIN v2.Maquinarias       M2  ON TS.id_maquinaria2       = M2.id_maquinaria
+            LEFT JOIN v2.Maquinarias       M2  ON TS.id_maquinaria2       = M2.id_maquinaria
             OUTER APPLY (
                 SELECT STUFF((
-                    SELECT ', ' + I.nombre_comercial + ' ' + CAST(SD.dosis AS NVARCHAR)
+                    SELECT ', ' + I.nombre_comercial 
+                                + ' ' + CAST(SD.dosis AS NVARCHAR)
+                                + ' ' + COALESCE(UM.nombre, '')
                     FROM v2.TareaSiembra_Detalle SD
-                    JOIN v2.Insumos I ON SD.id_insumo = I.id_insumo
+                    JOIN v2.Insumos I           ON SD.id_insumo  = I.id_insumo
+                    LEFT JOIN v2.UnidadesMedida UM ON I.id_unidad = UM.id_unidad
                     WHERE SD.id_siembra = TS.id_siembra
                     ORDER BY I.nombre_comercial
                     FOR XML PATH(''), TYPE

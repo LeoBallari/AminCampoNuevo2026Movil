@@ -38,7 +38,7 @@ class SiembraScreen:
                     if not datos:
                         self.lv_resumen.controls.append(
                             ft.Container(
-                                content=ft.Text("No hay registros para mostrar.", size=14, color=ft.Colors.BLUE_GREY_400),
+                                content=ft.Text("No hay registros para mostrar.", size=16, color=ft.Colors.BLUE_GREY_400),
                                 padding=30, alignment=ft.alignment.center
                             )
                         )
@@ -75,9 +75,9 @@ class SiembraScreen:
                         self.lv_resumen.controls.append(
                             ft.Container(
                                 content=ft.Row([
-                                    ft.Text("Fecha", size=12, weight="bold", width=70),
-                                    ft.Text("Lote", size=12, weight="bold", expand=True),
-                                    ft.Text("Has", size=12, weight="bold", width=50, text_align="right"),
+                                    ft.Text("Fecha", size=14, weight="bold", width=95),
+                                    ft.Text("Lote", size=14, weight="bold", expand=True),
+                                    ft.Text("Has", size=14, weight="bold", width=60, text_align="right"),
                                 ], spacing=10),
                                 padding=ft.padding.symmetric(horizontal=10, vertical=5),
                                 bgcolor=ft.Colors.BLUE_GREY_50
@@ -95,11 +95,11 @@ class SiembraScreen:
                                 ft.Container(
                                     content=ft.Column([
                                         ft.Row([
-                                            ft.Text(fecha_str, size=12, width=70),
-                                            ft.Text(it.get('bloque', 'S/D'), size=12, weight="bold", expand=True),
-                                            ft.Text(f"{has:.1f}", size=12, width=50, text_align="right"),
+                                            ft.Text(fecha_str, size=14, width=95),
+                                            ft.Text(it.get('bloque', 'S/D'), size=14, weight="bold", expand=True),
+                                            ft.Text(f"{has:.1f}", size=14, width=60, text_align="right"),
                                         ], spacing=10),
-                                        ft.Text(it.get('insumos', ''), size=11, color=ft.Colors.BLUE_GREY_400, italic=True),
+                                        ft.Text(it.get('insumos', ''), size=13, color=ft.Colors.BLUE_GREY_400, italic=True),
                                     ], spacing=2),
                                     padding=ft.padding.symmetric(horizontal=10, vertical=8),
                                     border=ft.border.only(bottom=ft.BorderSide(0.5, ft.Colors.BLUE_GREY_100))
@@ -111,7 +111,7 @@ class SiembraScreen:
                             ft.Container(
                                 content=ft.Text(
                                     f"SUBTOTAL {estadio}: {subtotal_has:,.1f} has",
-                                    size=12, weight="bold", color=ft.Colors.WHITE
+                                    size=14, weight="bold", color=ft.Colors.WHITE
                                 ),
                                 bgcolor=ft.Colors.BLUE_GREY_700,
                                 padding=8,
