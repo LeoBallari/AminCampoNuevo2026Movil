@@ -85,7 +85,7 @@ class LotesScreen:
                                         ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                         # Línea 2: DEMÁS DATOS
                                         ft.Text(
-                                            f"Prop: {it.get('propietario', '-')} | Cultivo: {it.get('cultivo', '-')} | {it.get('clase', '-')}",
+                                            f"Respa: {it.get('renspa', '-')} | Cultivo: {it.get('cultivo', '-')} | {it.get('clase', '-')}",
                                             size=13, color=ft.Colors.BLUE_GREY_400, italic=True
                                         ),
                                     ], spacing=2),

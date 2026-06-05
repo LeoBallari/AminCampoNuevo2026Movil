@@ -55,9 +55,9 @@ def get_lotes():
         return jsonify([{
             "bloque": r[0],
             "has": r[1],
-            "Cod. Renspa": r[2],
-            "% Propio": r[3],
-            "% Arrendado": r[4],
+            "renspa": r[2],
+            "propio": r[3],
+            "arrendado": r[4],
         } for r in rows])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
