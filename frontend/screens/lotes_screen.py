@@ -55,6 +55,10 @@ class LotesScreen:
                     for it in datos:
                         has = float(it.get('has', 0))
                         
+                        # Calculamos los valores antes de armar la lista de controles
+                        propio = int(round(float(it.get('propio') or 0)))
+                        arrend = int(round(float(it.get('arrendado') or 0)))
+
                         # FILA DE DATOS EN DOS NIVELES (Estilo Tabla Mobile)
                         self.lv_resumen.controls.append(
                             ft.Container(
@@ -64,9 +68,9 @@ class LotesScreen:
                                         ft.Text(it.get('bloque', 'S/D'), size=15, weight="bold", expand=True),
                                         ft.Text(f"{has:.1f} has", size=15, weight="bold", color=ft.Colors.BLUE_700),
                                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                                    # Línea 2: DEMÁS DATOS
+                                    # Línea 2: DETALLES (Porcentajes redondeados sin decimales)
                                     ft.Text(
-                                        f"Renspa: {it.get('renspa') or '-'} | Propio: {it.get('propio') or 0}% | Arrend: {it.get('arrendado') or 0}%",
+                                        f"Renspa: {it.get('renspa') or '-'} | Propio: {propio}% | Arrend: {arrend}%",
                                         size=13, color=ft.Colors.BLUE_GREY_400, italic=True
                                     ),
                                 ], spacing=2),
@@ -145,7 +149,7 @@ class LotesScreen:
                 UIStyles.get_footer_container(
                     ft.Column([
                         ft.Row([ft.Text("TOTAL SUPERFICIE", color=ft.Colors.BLUE_200, size=12, weight="bold"), self.txt_total_has], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                        ft.Row([ft.Text("CANTIDAD LOTES", color=ft.Colors.BLUE_200, size=12, weight="bold"), self.txt_total_lotes], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                        ft.Row([ft.Text("CANTIDAD BLOQUES", color=ft.Colors.BLUE_200, size=12, weight="bold"), self.txt_total_lotes], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ], spacing=2, tight=True)
                 )
             ]
