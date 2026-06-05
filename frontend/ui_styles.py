@@ -20,7 +20,9 @@ class UIStyles:
             bgcolor=ft.Colors.BLUE_GREY_900,
             color=ft.Colors.WHITE,
             center_title=False,
-            actions=actions
+            actions=actions,
+            elevation=4,  # Agrega la sombra (elevación)
+            shadow_color=ft.Colors.BLACK, # Define el color de la sombra
         )
 
     @staticmethod

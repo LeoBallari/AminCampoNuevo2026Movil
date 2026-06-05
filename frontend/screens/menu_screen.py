@@ -159,10 +159,10 @@ class MenuScreen:
                 # Footer Fijo
                 ft.Container(
                     height=85,  # Aumentamos para compensar el área segura de Android
-                    bgcolor=ft.Colors.WHITE,
+                    bgcolor=ft.Colors.SURFACE, # Color adaptable al tema
                     padding=ft.padding.only(left=40, right=40, top=5, bottom=20),
                     border_radius=ft.border_radius.only(top_left=20, top_right=20),
-                    border=ft.border.only(top=ft.BorderSide(0.5, ft.Colors.BLUE_GREY_100)),
+                    border=ft.border.only(top=ft.BorderSide(0.5, ft.Colors.OUTLINE_VARIANT)),
                     shadow=ft.BoxShadow(
                         spread_radius=1,
                         blur_radius=15,
@@ -174,14 +174,14 @@ class MenuScreen:
                         [
                             ft.IconButton(
                                 icon=ft.Icons.PERSON_OUTLINE,
-                                icon_color=ft.Colors.BLUE_GREY_800,
+                                icon_color=ft.Colors.ON_SURFACE, # Color adaptable
                                 icon_size=30,
                                 on_click=handle_perfil,
                                 tooltip="Mi Perfil"
                             ),
                             ft.IconButton(
                                 icon=ft.Icons.SETTINGS_OUTLINED,
-                                icon_color=ft.Colors.BLUE_GREY_800,
+                                icon_color=ft.Colors.ON_SURFACE, # Color adaptable
                                 icon_size=30,
                                 on_click=handle_settings,
                                 tooltip="Ajustes"

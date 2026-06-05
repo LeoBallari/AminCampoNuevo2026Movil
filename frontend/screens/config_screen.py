@@ -8,6 +8,13 @@ class ConfigScreen:
 
     def show(self):
         """Retorna la vista de Configuración"""
+        def toggle_theme(e):
+            # Cambiamos el modo y lo guardamos en el almacenamiento local
+            theme_val = "dark" if e.control.value else "light"
+            self.page.theme_mode = theme_val
+            self.page.client_storage.set("theme_mode", theme_val)
+            self.page.update()
+
         return ft.View(
             route="/config",
             # El AppBar es clave: Flet detecta que hay pantallas "abajo" 
@@ -26,6 +33,8 @@ class ConfigScreen:
                 bgcolor=ft.Colors.BLUE_GREY_900,
                 color=ft.Colors.WHITE,
                 center_title=False,
+                elevation=4,  # Consistencia con el resto de la app
+                shadow_color=ft.Colors.BLACK,
             ),
             vertical_alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -37,7 +46,11 @@ class ConfigScreen:
                         ft.Text("Ajustes del Sistema", size=20, weight="bold"),
                         ft.Divider(),
                         ft.Switch(label="Notificaciones de Despachos", value=True),
-                        ft.Switch(label="Modo Oscuro", value=False),
+                        ft.Switch(
+                            label="Modo Oscuro", 
+                            value=self.page.theme_mode in (ft.ThemeMode.DARK, "dark", "DARK"),
+                            on_change=toggle_theme
+                        ),
                         ft.TextField(label="Servidor API", value="https://render.com..."),
                         ft.Divider(),
                         # Botón manual de regreso por si no quieres usar la flecha de arriba

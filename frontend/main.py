@@ -27,7 +27,11 @@ class App:
         
         # Configurar página usando la sintaxis moderna para Windows
         self.page.title = APP_TITLE
-        self.page.theme_mode = THEME_MODE
+        
+        # Cargar tema guardado persistentemente
+        saved_theme = self.page.client_storage.get("theme_mode")
+        self.page.theme_mode = saved_theme if saved_theme else THEME_MODE
+
         self.page.window.width = WINDOW_WIDTH
         self.page.window.height = WINDOW_HEIGHT
         self.page.window.resizable = False
