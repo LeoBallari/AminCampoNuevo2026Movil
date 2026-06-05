@@ -93,14 +93,17 @@ class MenuScreen:
         btn_estadisticas = menu_button("assets/imagenes/btn_estadisticas.png", handle_estadisticas)
         btn_consumidos = menu_button("assets/imagenes/btn_consumido.png", lambda e: print("Navegando a Consumidos"))
         
-        btn_settings = menu_button2("Ajustes", ft.Icons.SETTINGS, handle_settings)
-        btn_perfil = menu_button2("Mi Perfil", ft.Icons.PERSON, handle_perfil)
-
         # === RETORNAMOS LA VISTA NATIVA ===
         return ft.View(
             route="/menu",
             appbar=UIStyles.get_appbar(
-                title="CAMPO MOVIL",
+                title=ft.Text(
+                    spans=[
+                        ft.TextSpan("CAMPO", ft.TextStyle(weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)),
+                        ft.TextSpan("MOVIL", ft.TextStyle(weight=ft.FontWeight.BOLD, color="#caa43d")),
+                    ],
+                    size=20,
+                ),
                 leading=ft.Container(
                     content=ft.Image(
                         src=os.path.join(BASE_DIR, "assets/imagenes/logo_reportes.png"),
@@ -116,7 +119,6 @@ class MenuScreen:
             vertical_alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
-                ft.Container(height=10),  # Espaciador superior
                 ft.Container(
                     content=ft.Column(
                         controls=[
@@ -145,19 +147,49 @@ class MenuScreen:
                                 alignment=ft.MainAxisAlignment.SPACE_EVENLY,
                                 spacing=15,
                             ),
-                            ft.Divider(height=40, thickness=1, color=ft.Colors.BLUE_GREY_100),
-                            ft.Row(
-                                [btn_perfil, btn_settings],
-                                alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                            ),
                         ],
                         spacing=10,
                         expand=True,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        scroll=ft.ScrollMode.HIDDEN,
+                        scroll=ft.ScrollMode.AUTO,
                     ),
                     expand=True,
-                    padding=20
+                    padding=ft.padding.only(left=20, right=20, top=15, bottom=10)
+                ),
+                # Footer Fijo
+                ft.Container(
+                    height=85,  # Aumentamos para compensar el área segura de Android
+                    bgcolor=ft.Colors.WHITE,
+                    padding=ft.padding.only(left=40, right=40, top=5, bottom=20),
+                    border_radius=ft.border_radius.only(top_left=20, top_right=20),
+                    border=ft.border.only(top=ft.BorderSide(0.5, ft.Colors.BLUE_GREY_100)),
+                    shadow=ft.BoxShadow(
+                        spread_radius=1,
+                        blur_radius=15,
+                        color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
+                        offset=ft.Offset(0, -5),  # Desplaza la sombra hacia arriba
+                        blur_style=ft.ShadowBlurStyle.NORMAL,
+                    ),
+                    content=ft.Row(
+                        [
+                            ft.IconButton(
+                                icon=ft.Icons.PERSON_OUTLINE,
+                                icon_color=ft.Colors.BLUE_GREY_800,
+                                icon_size=30,
+                                on_click=handle_perfil,
+                                tooltip="Mi Perfil"
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.SETTINGS_OUTLINED,
+                                icon_color=ft.Colors.BLUE_GREY_800,
+                                icon_size=30,
+                                on_click=handle_settings,
+                                tooltip="Ajustes"
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.START, # Alinea iconos arriba
+                    ),
                 )
             ]
         )

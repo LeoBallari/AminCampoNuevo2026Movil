@@ -4,7 +4,7 @@ class UIStyles:
     """Clase para estandarizar la interfaz en todas las pantallas"""
     
     @staticmethod
-    def get_appbar(title: str, on_home_click=None, leading=None, actions=None):
+    def get_appbar(title, on_home_click=None, leading=None, actions=None):
         """Genera un AppBar estandarizado"""
         return ft.AppBar(
             leading=leading if leading else ft.IconButton(
@@ -12,7 +12,11 @@ class UIStyles:
                 icon_color=ft.Colors.WHITE,
                 on_click=on_home_click
             ),
-            title=ft.Text(title, size=18, weight="bold"),
+            title=(
+                title 
+                if isinstance(title, ft.Control) 
+                else ft.Text(str(title), size=18, weight="bold")
+            ),
             bgcolor=ft.Colors.BLUE_GREY_900,
             color=ft.Colors.WHITE,
             center_title=False,
