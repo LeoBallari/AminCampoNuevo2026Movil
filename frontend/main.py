@@ -23,6 +23,7 @@ class App:
         self.usuario_actual = None
         self.despachos_screen = None  # Cache para persistir el estado
         self.cosecha_screen = None
+        self.siembra_screen = None
         
         # Configurar página usando la sintaxis moderna para Windows
         self.page.title = APP_TITLE
@@ -82,6 +83,12 @@ class App:
                 from screens.cosecha_screen import CosechaScreen
                 self.cosecha_screen = CosechaScreen(self.page)
             self.page.views.append(self.cosecha_screen.show())
+            
+        elif self.page.route == "/siembra":
+            if not self.siembra_screen:
+                from screens.siembra_screen import SiembraScreen
+                self.siembra_screen = SiembraScreen(self.page)
+            self.page.views.append(self.siembra_screen.show())
 
         elif self.page.route == "/despachos/detalle":
             # La vista de detalle ya se construye desde DespachosScreen.

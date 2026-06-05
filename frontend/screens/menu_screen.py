@@ -29,6 +29,10 @@ class MenuScreen:
         def handle_cosecha(e):
             """Maneja click en Cosecha"""
             self.page.go("/cosecha")
+        
+        def handle_siembra(e):
+            """Maneja click en Siembra"""
+            self.page.go("/siembra")
             
         def handle_estadisticas(e):
             """Maneja click en Reportes"""
@@ -80,7 +84,7 @@ class MenuScreen:
         # Definición de botones
         btn_despachos = menu_button("assets/imagenes/btn_despachos.png", handle_despachos)
         btn_cosecha = menu_button("assets/imagenes/btn_cosecha.png", handle_cosecha)
-        btn_siembra = menu_button("assets/imagenes/btn_siembra.png", lambda e: print("Navegando a Siembra"))
+        btn_siembra = menu_button("assets/imagenes/btn_siembra.png", handle_siembra)
         btn_pulverizacion = menu_button("assets/imagenes/btn_pulverizacion.png", lambda e: print("Navegando a Pulverización"))
         btn_fertilizacion = menu_button("assets/imagenes/btn_fertilizantes.png", lambda e: print("Navegando a Fertilización"))
         btn_labranzas = menu_button("assets/imagenes/btn_labranzas.png", lambda e: print("Navegando a Labranzas"))

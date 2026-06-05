@@ -43,6 +43,7 @@ def get_siembra_resumen():
                 TS.fecha AS fecha,
                 B.nombre_bloque AS bloque,
                 TS.has,
+                TS.estadio,
                 O.insumos
             FROM v2.TareaSiembra AS TS
             INNER JOIN v2.Campañas          C   ON TS.id_campaña           = C.id_campaña
@@ -73,7 +74,8 @@ def get_siembra_resumen():
             "fecha": r[0].isoformat() if r[0] else None,
             "bloque": r[1],
             "has": r[2],
-            "insumos": r[3] or "",
+            "estadio": r[3],
+            "insumos": r[4] or "",
         } for r in rows])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
