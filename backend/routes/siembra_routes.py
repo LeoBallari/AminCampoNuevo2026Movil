@@ -71,7 +71,7 @@ def get_siembra_resumen():
         rows = cursor.fetchall()
         conn.close()
         return jsonify([{
-            "fecha": r[0].isoformat() if r[0] else None,
+e            "fecha": r[0].isoformat() if hasattr(r[0], 'isoformat') else r[0],
             "bloque": r[1],
             "has": r[2],
             "estadio": r[3],

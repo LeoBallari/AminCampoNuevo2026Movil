@@ -25,18 +25,27 @@ class SiembraScreen:
 
     def cargar_resumen(self):
         """Carga el resumen siembra"""
+        print(f"\n[DEBUG] Iniciando cargar_resumen...")
         self.loading.visible = True
         self.lv_resumen.controls.clear()
         self.page.update()
 
         try:
             params = {"id_campana": self.dd_campana.value, "id_cultivo": self.dd_cultivo.value}
+            print(f"[DEBUG] Enviando GET a /api/siembra/resumen con params: {params}")
+            
             with httpx.Client() as client:
                 res = client.get(f"{API_URL}/api/siembra/resumen", params=params, timeout=15)
+                print(f"[DEBUG] API Response Status: {res.status_code}")
+
                 if res.status_code == 200:
                     datos = res.json()
+                    print(f"[DEBUG] Datos recibidos: {len(datos)} registros.")
+                    if len(datos) > 0:
+                        print(f"[DEBUG] Muestra del primer registro: {datos[0]}")
                     
                     if not datos:
+                        print("[DEBUG] La lista de datos está vacía.")
                         self.lv_resumen.controls.append(
                             ft.Container(
                                 content=ft.Text("No hay datos para esta selección.", size=14, color=ft.Colors.BLUE_GREY_400),
@@ -61,6 +70,8 @@ class SiembraScreen:
                         if est not in grupos:
                             grupos[est] = []
                         grupos[est].append(item)
+                    
+                    print(f"[DEBUG] Grupos detectados: {list(grupos.keys())}")
 
                     # Construir la UI por cada grupo
                     for estadio, items in grupos.items():
@@ -121,9 +132,13 @@ class SiembraScreen:
                                 margin=ft.margin.only(bottom=10)
                             )
                         )
+                    
+                    print("[DEBUG] UI construida exitosamente.")
+                else:
+                    print(f"[DEBUG] Error en API: {res.text}")
 
         except Exception as e:
-            print(f"Error al cargar resumen: {e}")
+            print(f"[DEBUG] EXCEPCIÓN en cargar_resumen: {str(e)}")
         
         self.loading.visible = False
         self.page.update()
@@ -131,6 +146,7 @@ class SiembraScreen:
 
     def cargar_filtros(self):
         """Descarga los datos para los dropdowns desde la API"""
+        print("[DEBUG] Cargando filtros (campañas y cultivos)...")
         self.loading.visible = True
         self.page.update()
 
@@ -138,6 +154,7 @@ class SiembraScreen:
             with httpx.Client() as client:
                 # Cargar Campañas
                 res_camp = client.get(f"{API_URL}/api/campañas", timeout=10)
+                print(f"[DEBUG] Cargar Campañas Status: {res_camp.status_code}")
                 if res_camp.status_code == 200:
                     campanas = res_camp.json()
                     # Usamos 'key' para el ID y 'text' para lo que se muestra
@@ -147,6 +164,7 @@ class SiembraScreen:
                 
                 # Cargar Cultivos
                 res_cult = client.get(f"{API_URL}/api/cultivos", timeout=10)
+                print(f"[DEBUG] Cargar Cultivos Status: {res_cult.status_code}")
                 if res_cult.status_code == 200:
                     cultivos = res_cult.json()
                     # Lo mismo para cultivos
@@ -155,7 +173,7 @@ class SiembraScreen:
                     ]
 
         except Exception as e:
-            print(f"Error cargando filtros: {e}")
+            print(f"[DEBUG] EXCEPCIÓN en cargar_filtros: {str(e)}")
         
         self.loading.visible = False
         self.page.update()
