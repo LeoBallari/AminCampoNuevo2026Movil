@@ -67,31 +67,52 @@ class MenuScreen:
                 )
             )
 
-        def menu_button(image, on_click):
-            image_button = ft.Container(
-                content=ft.Image(
-                    src=os.path.join(BASE_DIR, image),
-                    width=150,
-                    height=150,
+        def menu_button(image, text, on_click):
+            return ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Image(
+                            src=os.path.join(BASE_DIR, image),
+                            width=100,
+                            height=100,
+                            fit=ft.ImageFit.CONTAIN,
+                        ),
+                        ft.Text(
+                            text,
+                            size=14,
+                            weight=ft.FontWeight.W_600,
+                            color=ft.Colors.BLUE_GREY_900, # Texto siempre oscuro para fondo blanco
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=8,
                 ),
-                ink=True,                  # Activa el efecto visual de onda al hacer clic
-                on_click=on_click,         # Asigna la función de clic# Asigna la función de ejecución
-                border_radius=8,           # Redondeado opcional para el área de clic
+                width=160,
+                height=160,
+                bgcolor=ft.Colors.WHITE,
+                border_radius=15,
+                ink=True,
+                on_click=on_click,
+                padding=10,
+                shadow=ft.BoxShadow(
+                    blur_radius=12,
+                    color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
+                    offset=ft.Offset(0, 3),
+                ),
             )
-           
-            return image_button
         
-        # Definición de botones
-        btn_despachos = menu_button("assets/imagenes/btn_despachos.png", handle_despachos)
-        btn_cosecha = menu_button("assets/imagenes/btn_cosecha.png", handle_cosecha)
-        btn_siembra = menu_button("assets/imagenes/btn_siembra.png", handle_siembra)
-        btn_pulverizacion = menu_button("assets/imagenes/btn_pulverizacion.png", lambda e: print("Navegando a Pulverización"))
-        btn_fertilizacion = menu_button("assets/imagenes/btn_fertilizantes.png", lambda e: print("Navegando a Fertilización"))
-        btn_labranzas = menu_button("assets/imagenes/btn_labranzas.png", lambda e: print("Navegando a Labranzas"))
-        btn_semillero = menu_button("assets/imagenes/btn_semillero.png", lambda e: print("Navegando a Semillero"))
-        btn_lotes = menu_button("assets/imagenes/btn_lotes.png", lambda e: print("Navegando a Lotes"))
-        btn_estadisticas = menu_button("assets/imagenes/btn_estadisticas.png", handle_estadisticas)
-        btn_consumidos = menu_button("assets/imagenes/btn_consumido.png", lambda e: print("Navegando a Consumidos"))
+        # Definición de botones con etiquetas de texto y estilo de tarjeta
+        btn_despachos = menu_button("assets/imagenes/btn_despachos.png", "Despachos", handle_despachos)
+        btn_cosecha = menu_button("assets/imagenes/btn_cosecha.png", "Cosecha", handle_cosecha)
+        btn_siembra = menu_button("assets/imagenes/btn_siembra.png", "Siembra", handle_siembra)
+        btn_pulverizacion = menu_button("assets/imagenes/btn_pulverizacion.png", "Pulverización", lambda e: print("Navegando a Pulverización"))
+        btn_fertilizacion = menu_button("assets/imagenes/btn_fertilizantes.png", "Fertilización", lambda e: print("Navegando a Fertilización"))
+        btn_labranzas = menu_button("assets/imagenes/btn_labranzas.png", "Labranzas", lambda e: print("Navegando a Labranzas"))
+        btn_semillero = menu_button("assets/imagenes/btn_semillero.png", "Semillero", lambda e: print("Navegando a Semillero"))
+        btn_lotes = menu_button("assets/imagenes/btn_lotes.png", "Lotes", lambda e: print("Navegando a Lotes"))
+        btn_estadisticas = menu_button("assets/imagenes/btn_estadisticas.png", "Estadísticas", handle_estadisticas)
+        btn_consumidos = menu_button("assets/imagenes/btn_consumido.png", "Consumidos", lambda e: print("Navegando a Consumidos"))
         
         # === RETORNAMOS LA VISTA NATIVA ===
         return ft.View(
@@ -125,27 +146,27 @@ class MenuScreen:
                             ft.Row(
                                 [btn_despachos, btn_cosecha],
                                 alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                spacing=15,
+                                spacing=10,
                             ),
                             ft.Row(
                                 [btn_siembra, btn_pulverizacion],
                                 alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                spacing=15,
+                                spacing=10,
                             ),
                             ft.Row(
                                 [btn_fertilizacion, btn_labranzas],
                                 alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                spacing=15,
+                                spacing=10,
                             ),
                             ft.Row(
                                 [btn_semillero, btn_lotes],
                                 alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                spacing=15,
+                                spacing=10,
                             ),
                             ft.Row(
                                 [btn_estadisticas, btn_consumidos],
                                 alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                spacing=15,
+                                spacing=10,
                             ),
                         ],
                         spacing=10,
@@ -154,15 +175,15 @@ class MenuScreen:
                         scroll=ft.ScrollMode.AUTO,
                     ),
                     expand=True,
-                    padding=ft.padding.only(left=20, right=20, top=15, bottom=10)
+                    padding=ft.padding.only(left=5, right=5, top=15, bottom=10)
                 ),
                 # Footer Fijo
                 ft.Container(
                     height=85,  # Aumentamos para compensar el área segura de Android
-                    bgcolor=ft.Colors.SURFACE, # Color adaptable al tema
+                    bgcolor="surface", # Color adaptable al tema
                     padding=ft.padding.only(left=40, right=40, top=5, bottom=20),
                     border_radius=ft.border_radius.only(top_left=20, top_right=20),
-                    border=ft.border.only(top=ft.BorderSide(0.5, ft.Colors.OUTLINE_VARIANT)),
+                    border=ft.border.only(top=ft.BorderSide(0.5, "outlinevariant")),
                     shadow=ft.BoxShadow(
                         spread_radius=1,
                         blur_radius=15,
@@ -172,19 +193,35 @@ class MenuScreen:
                     ),
                     content=ft.Row(
                         [
-                            ft.IconButton(
-                                icon=ft.Icons.PERSON_OUTLINE,
-                                icon_color=ft.Colors.ON_SURFACE, # Color adaptable
-                                icon_size=30,
+                            ft.Container(
+                                content=ft.Column(
+                                    [
+                                        ft.Icon(ft.Icons.PERSON_OUTLINE, color="onsurface", size=28),
+                                        ft.Text("Perfil", size=10, weight=ft.FontWeight.W_500, color="onsurface"),
+                                    ],
+                                    spacing=1,
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
                                 on_click=handle_perfil,
-                                tooltip="Mi Perfil"
+                                ink=True,
+                                border_radius=10,
+                                padding=ft.padding.symmetric(vertical=5, horizontal=15),
+                                tooltip="Mi Perfil",
                             ),
-                            ft.IconButton(
-                                icon=ft.Icons.SETTINGS_OUTLINED,
-                                icon_color=ft.Colors.ON_SURFACE, # Color adaptable
-                                icon_size=30,
+                            ft.Container(
+                                content=ft.Column(
+                                    [
+                                        ft.Icon(ft.Icons.SETTINGS_OUTLINED, color="onsurface", size=28),
+                                        ft.Text("Ajustes", size=10, weight=ft.FontWeight.W_500, color="onsurface"),
+                                    ],
+                                    spacing=1,
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
                                 on_click=handle_settings,
-                                tooltip="Ajustes"
+                                ink=True,
+                                border_radius=10,
+                                padding=ft.padding.symmetric(vertical=5, horizontal=15),
+                                tooltip="Ajustes",
                             ),
                         ],
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
