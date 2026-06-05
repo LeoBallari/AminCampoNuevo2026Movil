@@ -35,6 +35,18 @@ class SiembraScreen:
                 res = client.get(f"{API_URL}/api/siembra/resumen", params=params, timeout=15)
                 if res.status_code == 200:
                     datos = res.json()
+                    
+                    if not datos:
+                        self.lv_resumen.controls.append(
+                            ft.Container(
+                                content=ft.Text("No hay datos para esta selección.", size=14, color=ft.Colors.BLUE_GREY_400),
+                                padding=30, alignment=ft.alignment.center
+                            )
+                        )
+                        self.loading.visible = False
+                        self.page.update()
+                        return
+
                     # Calcular Totales para el Resumen del Resumen
                     total_has = sum(float(it.get('has', 0)) for it in datos)
                     total_lotes = len(datos)
@@ -45,7 +57,7 @@ class SiembraScreen:
                     # --- AGRUPAMIENTO POR ESTADIO ---
                     grupos = {}
                     for item in datos:
-                        est = item.get('estadio', 'SIN CLASIFICAR').upper()
+                        est = (item.get('estadio') or 'SIN CLASIFICAR').upper()
                         if est not in grupos:
                             grupos[est] = []
                         grupos[est].append(item)
@@ -72,7 +84,10 @@ class SiembraScreen:
                                 ft.DataCell(ft.Text(fecha_str, size=12)),
                                 ft.DataCell(ft.Text(it['bloque'], size=12)),
                                 ft.DataCell(ft.Text(f"{has:.1f}", size=13, weight="bold")),
-                                ft.DataCell(ft.Text(it.get('insumos', ''), size=11)),
+                                ft.DataCell(ft.Container(
+                                    content=ft.Text(it.get('insumos', ''), size=11, no_wrap=False),
+                                    width=180, padding=ft.padding.only(top=5, bottom=5)
+                                )),
                             ]))
 
                         # Crear la Tabla (Grilla)

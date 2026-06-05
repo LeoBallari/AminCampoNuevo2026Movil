@@ -109,12 +109,10 @@ class App:
         """Inicia la aplicación navegando a la raíz"""
         self.page.go("/")
 
-
 def main(page: ft.Page):
     """Función principal - punto de entrada de Flet"""
     app = App(page)
     app.run()
-
 
 if __name__ == "__main__":
     ft.app(target=main)
