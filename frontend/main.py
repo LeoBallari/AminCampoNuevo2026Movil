@@ -24,6 +24,7 @@ class App:
         self.despachos_screen = None  # Cache para persistir el estado
         self.cosecha_screen = None
         self.siembra_screen = None
+        self.lotes_screen = None
         
         # Configurar página usando la sintaxis moderna para Windows
         self.page.title = APP_TITLE
@@ -93,6 +94,12 @@ class App:
                 from screens.siembra_screen import SiembraScreen
                 self.siembra_screen = SiembraScreen(self.page)
             self.page.views.append(self.siembra_screen.show())
+
+        elif self.page.route == "/lotes":
+            if not self.lotes_screen:
+                from screens.lotes_screen import LotesScreen
+                self.lotes_screen = LotesScreen(self.page)
+            self.page.views.append(self.lotes_screen.show())
 
         elif self.page.route == "/despachos/detalle":
             # La vista de detalle ya se construye desde DespachosScreen.
