@@ -21,18 +21,19 @@ class DespachosScreen:
         
         self.tabla_datos = ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text("FECHA")),
-                ft.DataColumn(ft.Text("CP")),
-                ft.DataColumn(ft.Text("CTG")),
-                ft.DataColumn(ft.Text("KG")),
-                ft.DataColumn(ft.Text("DESTINO")),
-                ft.DataColumn(ft.Text("TRANSPORTE")),
-                ft.DataColumn(ft.Text("PATENTE")),
-                ft.DataColumn(ft.Text("ESTADO")),
+                ft.DataColumn(ft.Text("FECHA", size=14)),
+                ft.DataColumn(ft.Text("CP", size=14)),
+                ft.DataColumn(ft.Text("CTG", size=14)),
+                ft.DataColumn(ft.Text("KG", size=14)),
+                ft.DataColumn(ft.Text("DESTINO", size=14)),
+                ft.DataColumn(ft.Text("TRANSPORTE", size=14)),
+                ft.DataColumn(ft.Text("PATENTE", size=14)),
+                ft.DataColumn(ft.Text("ESTADO", size=14)),
             ],
             rows=[],
-            column_spacing=20,
+            column_spacing=22,
             heading_row_height=40,
+            horizontal_margin=10,
         )
 
     def on_filter_change(self, e):
@@ -91,14 +92,14 @@ class DespachosScreen:
                     detalles = res.json()
                     self.tabla_datos.rows = [
                         ft.DataRow(cells=[
-                            ft.DataCell(ft.Text(d.get('fecha', ''), size=12)),
-                            ft.DataCell(ft.Text(str(d.get('cp', ''))[-5:] if d.get('cp') else "", size=12)),
-                            ft.DataCell(ft.Text(d.get('ctg', ''), size=12)),
-                            ft.DataCell(ft.Text(f"{d.get('neto', 0):,.0f}", size=12)),
-                            ft.DataCell(ft.Text(d.get('destino', 'N/A'), size=12)),
-                            ft.DataCell(ft.Text(d.get('transporte', 'N/A'), size=12)),
-                            ft.DataCell(ft.Text(d.get('patente', ''), size=12)),
-                            ft.DataCell(ft.Text(d.get('estado', '-'), size=12, weight="bold")),
+                            ft.DataCell(ft.Text(d.get('fecha', ''), size=14)),
+                            ft.DataCell(ft.Text(str(d.get('cp', ''))[-5:] if d.get('cp') else "", size=14)),
+                            ft.DataCell(ft.Text(d.get('ctg', ''), size=14)),
+                            ft.DataCell(ft.Text(f"{d.get('neto', 0):,.0f}", size=14)),
+                            ft.DataCell(ft.Text(d.get('destino', 'N/A'), size=14)),
+                            ft.DataCell(ft.Text(d.get('transporte', 'N/A'), size=14)),
+                            ft.DataCell(ft.Text(d.get('patente', ''), size=14)),
+                            ft.DataCell(ft.Text(d.get('estado', '-'), size=14, weight="bold")),
                         ]) for d in detalles
                     ]
                     
@@ -147,7 +148,7 @@ class DespachosScreen:
                         controls=[
                             ft.Container(
                                 expand=True,
-                                padding=ft.padding.only(left=10, right=10, top=15, bottom=10),
+                                padding=ft.padding.only(left=2, right=2, top=15, bottom=10),
                                 content=ft.Column(
                                     detalle_controls,
                                     scroll=ft.ScrollMode.AUTO,
@@ -187,7 +188,7 @@ class DespachosScreen:
                         controls=[
                             ft.Container(
                                 expand=True,
-                                padding=10,
+                                padding=ft.padding.only(left=2, right=2, top=10, bottom=10),
                                 content=ft.Column([
                                     ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
                                     ft.Divider(),
@@ -227,7 +228,7 @@ class DespachosScreen:
                 controls=[
                     ft.Container(
                         expand=True,
-                        padding=10,
+                        padding=ft.padding.only(left=2, right=2, top=10, bottom=10),
                         content=ft.Column([
                             ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
                             ft.Divider(),

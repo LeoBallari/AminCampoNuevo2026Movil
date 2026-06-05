@@ -72,9 +72,9 @@ class CosechaScreen:
                             
                             filas_tabla.append(ft.DataRow(cells=[
                                 ft.DataCell(ft.Text(it['bloque'], size=12)),
-                                ft.DataCell(ft.Text(f"{rinde:.1f}", size=12, weight="bold")),
-                                ft.DataCell(ft.Text(f"{float(it.get('humedad', 0)):.1f}%", size=12)),
-                                ft.DataCell(ft.Text(f"{has:.1f}", size=12)),
+                                ft.DataCell(ft.Text(f"{rinde:.1f}", size=13, weight="bold")),
+                                ft.DataCell(ft.Text(f"{float(it.get('humedad', 0)):.1f}%", size=13)),
+                                ft.DataCell(ft.Text(f"{has:.0f}", size=13)),
                             ]))
 
                         # Crear la Tabla (Grilla)
@@ -82,10 +82,10 @@ class CosechaScreen:
                         
                         tabla = ft.DataTable(
                             columns=[
-                                ft.DataColumn(ft.Text("Lote", size=12)),
-                                ft.DataColumn(ft.Text("Rinde", size=12)),
-                                ft.DataColumn(ft.Text("Hum", size=12)),
-                                ft.DataColumn(ft.Text("Has", size=12)),
+                                ft.DataColumn(ft.Text("Lote", size=14)),
+                                ft.DataColumn(ft.Text("Rinde", size=14)),
+                                ft.DataColumn(ft.Text("Hum", size=14)),
+                                ft.DataColumn(ft.Text("Has", size=14)),
                             ],
                             rows=filas_tabla,
                             column_spacing=22, # Más espacio entre columnas
