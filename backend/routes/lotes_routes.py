@@ -30,18 +30,24 @@ def get_lotes():
             SELECT 
                 b.nombre_bloque,
                 b.has_bloque,
+                STUFF((
+                    SELECT DISTINCT ', ' + l2.cod_renspa
+                    FROM v2.Bloque_lotes bl2
+                    INNER JOIN v2.Lotes l2 ON bl2.id_lote = l2.id_lote
+                    WHERE bl2.id_bloque = b.id_bloque AND l2.cod_renspa IS NOT NULL
+                    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS cod_renspa,
                 ROUND(SUM(CASE WHEN l.condicion = 'Propio' THEN l.ha_reales ELSE 0 END) * 100.0 / NULLIF(SUM(l.ha_reales), 0), 2) AS porcentaje_propia,
                 ROUND(SUM(CASE WHEN l.condicion = 'Arrendado' THEN l.ha_reales ELSE 0 END) * 100.0 / NULLIF(SUM(l.ha_reales), 0), 2) AS porcentaje_arrendada
             
             FROM v2.BloquesProduccion bp
             INNER JOIN v2.Bloques b ON bp.id_bloque = b.id_bloque
-            INNER JOIN v2.Campañas c ON bp.id_campaña = c.id_campaña
             INNER JOIN v2.Bloque_lotes bl ON b.id_bloque = bl.id_bloque
             INNER JOIN v2.Lotes l ON bl.id_lote = l.id_lote
             
             WHERE bp.id_campaña = %s
 
-            GROUP BY b.has_bloque, b.nombre_bloque, c.nombre ORDER BY b.nombre_bloque
+            GROUP BY b.id_bloque, b.has_bloque, b.nombre_bloque
+            ORDER BY b.nombre_bloque;
         """
         cursor.execute(query, (id_campana,))
         rows = cursor.fetchall()
