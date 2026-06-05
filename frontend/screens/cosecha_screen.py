@@ -35,6 +35,17 @@ class CosechaScreen:
                 res = client.get(f"{API_URL}/api/cosecha/resumen", params=params, timeout=15)
                 if res.status_code == 200:
                     datos = res.json()
+                    if not datos:
+                        self.lv_resumen.controls.append(
+                            ft.Container(
+                                content=ft.Text("No hay registros para mostrar.", size=14, color=ft.Colors.BLUE_GREY_400),
+                                padding=30, alignment=ft.alignment.center
+                            )
+                        )
+                        self.loading.visible = False
+                        self.page.update()
+                        return
+
                     # Calcular Totales para el Resumen del Resumen
                     total_qq = sum(float(it.get('rinde', 0)) * float(it.get('has', 0)) for it in datos)
                     total_has = sum(float(it.get('has', 0)) for it in datos)

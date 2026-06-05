@@ -53,6 +53,17 @@ class DespachosScreen:
                 res = client.get(f"{API_URL}/api/despachos/resumen", params=params, timeout=15)
                 if res.status_code == 200:
                     datos = res.json()
+                    if not datos:
+                        self.lv_resumen.controls.append(
+                            ft.Container(
+                                content=ft.Text("No hay registros para mostrar.", size=14, color=ft.Colors.BLUE_GREY_400),
+                                padding=30, alignment=ft.alignment.center
+                            )
+                        )
+                        self.loading.visible = False
+                        self.page.update()
+                        return
+
                     # Calcular Totales para el Resumen del Resumen
                     total_qq = sum(item['qq'] for item in datos)
                     total_cant = sum(item['cantidad'] for item in datos)
@@ -124,7 +135,7 @@ class DespachosScreen:
                             ft.Container(
                                 padding=20,
                                 content=ft.Text(
-                                    "No se encontraron despachos para esta entidad.",
+                                    "No hay registros para mostrar.",
                                     color=ft.Colors.BLUE_GREY_700,
                                     size=14,
                                 )
