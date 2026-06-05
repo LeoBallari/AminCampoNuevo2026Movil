@@ -52,57 +52,34 @@ class LotesScreen:
                     self.txt_total_has.value = f"{total_has:,.1f} has"
                     self.txt_total_lotes.value = f"{total_lotes} lotes"
 
-                    # --- AGRUPAMIENTO POR SECTOR O ESTADIO ---
-                    grupos = {}
-                    for item in datos:
-                        est = (item.get('sector') or item.get('estadio') or 'GENERAL').upper()
-                        if est not in grupos:
-                            grupos[est] = []
-                        grupos[est].append(item)
-                    
-                    # Construir la UI por cada grupo
-                    for grupo, items in grupos.items():
+                    for it in datos:
+                        has = float(it.get('has', 0))
+                        
+                        # FILA DE DATOS EN DOS NIVELES (Estilo Tabla Mobile)
                         self.lv_resumen.controls.append(
                             ft.Container(
-                                content=ft.Text(f"GRUPO: {grupo}", weight="bold", color=ft.Colors.BLUE_700),
-                                margin=ft.margin.only(top=10, bottom=5, left=5)
+                                content=ft.Column([
+                                    # Línea 1: BLOQUE Y HAS
+                                    ft.Row([
+                                        ft.Text(it.get('bloque', 'S/D'), size=15, weight="bold", expand=True),
+                                        ft.Text(f"{has:.1f} has", size=15, weight="bold", color=ft.Colors.BLUE_700),
+                                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                                    # Línea 2: DEMÁS DATOS
+                                    ft.Text(
+                                        f"Renspa: {it.get('renspa') or '-'} | Propio: {it.get('propio') or 0}% | Arrend: {it.get('arrendado') or 0}%",
+                                        size=13, color=ft.Colors.BLUE_GREY_400, italic=True
+                                    ),
+                                ], spacing=2),
+                                padding=ft.padding.symmetric(horizontal=12, vertical=10),
+                                bgcolor="surfacevariant",
+                                border_radius=8,
+                                border=ft.border.all(0.5, ft.Colors.OUTLINE_VARIANT),
                             )
                         )
-
-                        subtotal_has = 0
-                        for it in items:
-                            has = float(it.get('has', 0))
-                            subtotal_has += has
-                            
-                            # FILA DE DATOS EN DOS NIVELES (Estilo Tabla Mobile)
-                            self.lv_resumen.controls.append(
-                                ft.Container(
-                                    content=ft.Column([
-                                        # Línea 1: BLOQUE Y HAS
-                                        ft.Row([
-                                            ft.Text(it.get('bloque', 'S/D'), size=15, weight="bold", expand=True),
-                                            ft.Text(f"{has:.1f} has", size=15, weight="bold", color=ft.Colors.BLUE_900),
-                                        ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                                        # Línea 2: DEMÁS DATOS
-                                        ft.Text(
-                                            f"Respa: {it.get('renspa', '-')} | Cultivo: {it.get('cultivo', '-')} | {it.get('clase', '-')}",
-                                            size=13, color=ft.Colors.BLUE_GREY_400, italic=True
-                                        ),
-                                    ], spacing=2),
-                                    padding=ft.padding.symmetric(horizontal=12, vertical=10),
-                                    bgcolor=ft.Colors.WHITE if self.page.theme_mode == "light" else ft.Colors.BLUE_GREY_900,
-                                    border_radius=8,
-                                    border=ft.border.all(0.5, ft.Colors.BLUE_GREY_100),
-                                )
-                            )
-                        
-                        # Resumen del grupo (Subtotales resaltados)
-                        self.lv_resumen.controls.append(
-                            ft.Text(f"   Subtotal: {subtotal_has:,.1f} has", size=12, weight="bold", color=ft.Colors.BLUE_GREY_400)
-                        )
-
+                else:
+                    print(f"Error API: {res.status_code}")
         except Exception as e:
-            pass
+            print(f"Error al cargar resumen: {e}")
         
         self.loading.visible = False
         self.page.update()
@@ -124,7 +101,7 @@ class LotesScreen:
                     ]
 
         except Exception as e:
-            pass
+            print(f"Error al cargar filtros: {e}")
         
         self.loading.visible = False
         self.page.update()
