@@ -2,7 +2,7 @@ import flet as ft
 import threading
 import httpx
 import time
-from config import API_URL
+from config import API_URL, API_TIMEOUT
 from ui_styles import UIStyles
 
 
@@ -50,7 +50,7 @@ class DespachosScreen:
         try:
             params = {"id_campana": self.dd_campana.value, "id_cultivo": self.dd_cultivo.value}
             with httpx.Client() as client:
-                res = client.get(f"{API_URL}/api/despachos/resumen", params=params, timeout=15)
+                res = client.get(f"{API_URL}/api/despachos/resumen", params=params, timeout=API_TIMEOUT)
                 if res.status_code == 200:
                     datos = res.json()
                     if not datos:
@@ -113,7 +113,7 @@ class DespachosScreen:
                 "t": time.time()  # Cache buster
             }
             with httpx.Client() as client:
-                res = client.get(f"{API_URL}/api/despachos/detalle", params=params, timeout=15)
+                res = client.get(f"{API_URL}/api/despachos/detalle", params=params, timeout=API_TIMEOUT)
                 if res.status_code == 200:
                     detalles = res.json()
                     self.tabla_datos.rows = [
@@ -293,13 +293,13 @@ class DespachosScreen:
             if not campanas or not cultivos:
                 with httpx.Client() as client:
                     if not campanas:
-                        res = client.get(f"{API_URL}/api/campañas", timeout=10)
+                        res = client.get(f"{API_URL}/api/campañas", timeout=API_TIMEOUT)
                         if res.status_code == 200:
                             campanas = res.json()
                             self.page.session.set("global_campanas", campanas)
                     
                     if not cultivos:
-                        res = client.get(f"{API_URL}/api/cultivos", timeout=10)
+                        res = client.get(f"{API_URL}/api/cultivos", timeout=API_TIMEOUT)
                         if res.status_code == 200:
                             cultivos = res.json()
                             self.page.session.set("global_cultivos", cultivos)
