@@ -42,7 +42,7 @@ class MenuScreen:
         
         def handle_fertilizacion(e):
             """Maneja click en Fertilización"""
-            self.page.go("/fertilizacion")
+            #self.page.go("/fertilizacion")
             
         def handle_lotes(e):
             """Maneja click en Lotes"""
