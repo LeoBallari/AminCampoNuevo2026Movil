@@ -1,51 +1,64 @@
 import flet as ft
 import flet.map as ft_map
 
-from config import MAPTILER_API_KEY
 from ui_styles import UIStyles
 
 class FertilizacionScreen:
-    """Pantalla de Fertilización con integración de MapTiler"""
-    
     def __init__(self, page: ft.Page):
         self.page = page
 
     def show(self):
-        # NOTA: Debes obtener tu propia API Key en https://www.maptiler.com/cloud/
-        # El siguiente es un ejemplo de cómo configurar el TileLayer con MapTiler
-        MAPTILER_KEY = MAPTILER_API_KEY
-        
-        # Configuración del mapa centrado en una ubicación agrícola de ejemplo
-        map_control = ft_map.Map(
-            expand=True,
-            initial_center=ft_map.MapLatitudeLongitude(-34.588, -59.704), # Ejemplo: Chacabuco, Buenos Aires
-            initial_zoom=13,
-            interaction_configuration=ft_map.MapInteractionConfiguration(
-                flags=ft_map.MapInteractiveFlag.ALL
-            ),
-            layers=[
-                # Capa de satélite de MapTiler (Raster Tiles)
-                ft_map.TileLayer(
-                    # 'hybrid' incluye etiquetas de caminos y lugares sobre el satélite
-                    url_template=f"https://api.maptiler.com/maps/hybrid/{{z}}/{{x}}/{{y}}.jpg?key={MAPTILER_KEY}",
+        try:
+            map_control = ft_map.Map(
+                expand=True,
+                initial_center=ft_map.MapLatitudeLongitude(-34.588, -59.704),
+                initial_zoom=13,
+                keep_alive=True,
+                interaction_configuration=ft_map.MapInteractionConfiguration(
+                    flags=ft_map.MapInteractiveFlag.ALL
                 ),
-                # Capa de marcadores para identificar puntos de interés o lotes
-                ft_map.MarkerLayer(
-                    markers=[
-                        ft_map.Marker(
-                            content=ft.Icon(ft.Icons.AGRICULTURE, color=ft.Colors.LIGHT_GREEN_ACCENT_400, size=35),
-                            coordinates=ft_map.MapLatitudeLongitude(-34.588, -59.704),
-                        ),
-                    ]
+                layers=[
+                    ft_map.TileLayer(
+                        url_template="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        subdomains=["a", "b", "c"],
+                        error_image_src="https://upload.wikimedia.org/wikipedia/commons/8/89/No_image_available.svg",
+                        additional_options={
+                            "userAgentPackageName": "com.amin.campomovil"
+                        },
+                        on_image_error=lambda e: print(f"TileLayer error: {e.data}"),
+                    ),
+                    ft_map.MarkerLayer(
+                        markers=[
+                            ft_map.Marker(
+                                content=ft.Icon(ft.Icons.AGRICULTURE, color=ft.Colors.LIGHT_GREEN_ACCENT_400, size=35),
+                                coordinates=ft_map.MapLatitudeLongitude(-34.588, -59.704),
+                            ),
+                        ]
+                    ),
+                    ft_map.SimpleAttribution(
+                        text="OpenStreetMap contributors",
+                        text_style=ft.TextStyle(color=ft.Colors.WHITE, size=10),
+                    ),
+                ],
+            )
+        except Exception as ex:
+            map_control = ft.Container(
+                expand=True,
+                alignment=ft.alignment.center,
+                content=ft.Text(
+                    "No se pudo cargar el mapa en este dispositivo. Verifica la conexión o la configuración de MapTiler.",
+                    color=ft.Colors.RED,
+                    size=16,
+                    text_align=ft.TextAlign.CENTER,
                 ),
-            ],
-        )
+            )
 
         return ft.View(
             "/fertilizacion",
             appbar=UIStyles.get_appbar(
                 "Módulo de Fertilización",
-                on_home_click=lambda _: self.page.go("/menu")
+                on_home_click=lambda _: self.page.go("/menu"),
+                leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color=ft.Colors.WHITE, on_click=lambda _: self.page.go("/menu"))
             ),
             controls=[
                 ft.Column([
@@ -55,9 +68,8 @@ class FertilizacionScreen:
                         subtitle=ft.Text("Visualización satelital de áreas de aplicación"),
                         bgcolor=ft.Colors.SURFACE,
                     ),
-                    # El mapa se expande para ocupar todo el espacio disponible
-                    ft.Container(content=map_control, expand=True),
-                ], expand=True),
+                    ft.Container(content=ft.SafeArea(expand=True, content=map_control), expand=True),
+                ], expand=True, spacing=0),
             ],
-            padding=0 # Padding cero para que el mapa se vea a pantalla completa si se desea
+            padding=0
         )
