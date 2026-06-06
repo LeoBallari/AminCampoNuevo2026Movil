@@ -40,6 +40,10 @@ class MenuScreen:
             # self.page.go("/despachos")
             print("Navegando a Reportes")
         
+        def handle_fertilizacion(e):
+            """Maneja click en Fertilización"""
+            self.page.go("/fertilizacion")
+            
         def handle_lotes(e):
             """Maneja click en Lotes"""
             self.page.go("/lotes")
@@ -111,7 +115,7 @@ class MenuScreen:
         btn_cosecha = menu_button("assets/imagenes/btn_cosecha.png", "Cosecha", handle_cosecha)
         btn_siembra = menu_button("assets/imagenes/btn_siembra.png", "Siembra", handle_siembra)
         btn_pulverizacion = menu_button("assets/imagenes/btn_pulverizacion.png", "Pulverización", lambda e: print("Navegando a Pulverización"))
-        btn_fertilizacion = menu_button("assets/imagenes/btn_fertilizantes.png", "Fertilización", lambda e: print("Navegando a Fertilización"))
+        btn_fertilizacion = menu_button("assets/imagenes/btn_fertilizantes.png", "Fertilización", handle_fertilizacion)
         btn_labranzas = menu_button("assets/imagenes/btn_labranzas.png", "Labranzas", lambda e: print("Navegando a Labranzas"))
         btn_semillero = menu_button("assets/imagenes/btn_semillero.png", "Semillero", lambda e: print("Navegando a Semillero"))
         btn_lotes = menu_button("assets/imagenes/btn_lotes.png", "Lotes", handle_lotes)

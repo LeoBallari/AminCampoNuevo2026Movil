@@ -25,6 +25,7 @@ class App:
         self.cosecha_screen = None
         self.siembra_screen = None
         self.lotes_screen = None
+        self.fertilizacion_screen = None
         
         # Configurar página usando la sintaxis moderna para Windows
         self.page.title = APP_TITLE
@@ -54,7 +55,8 @@ class App:
     def on_logout(self):
         """Callback cuando el usuario se desconecta"""
         self.usuario_actual = None
-        self.despachos_screen = None # Limpiar cache al salir
+        self.despachos_screen = None
+        self.fertilizacion_screen = None # Limpiar cache al salir
         self.page.go("/")
         
     def on_route_change(self, e):
@@ -100,6 +102,12 @@ class App:
                 from screens.lotes_screen import LotesScreen
                 self.lotes_screen = LotesScreen(self.page)
             self.page.views.append(self.lotes_screen.show())
+            
+        elif self.page.route == "/fertilizacion":
+            if not self.fertilizacion_screen:
+                from screens.fertilizacion_screen import FertilizacionScreen
+                self.fertilizacion_screen = FertilizacionScreen(self.page)
+            self.page.views.append(self.fertilizacion_screen.show())
 
         elif self.page.route == "/despachos/detalle":
             # La vista de detalle ya se construye desde DespachosScreen.

@@ -71,12 +71,16 @@ class DespachosScreen:
                     
                     for item in datos:
                         self.lv_resumen.controls.append(
-                            ft.ListTile(
-                                title=ft.Text(item['entidad'], weight="bold"),
-                                subtitle=ft.Text(f"{item['qq']:.0f} qq — {item['cantidad']} despachos"),
-                                trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
-                                bgcolor=ft.Colors.BLUE_GREY_50,
-                                on_click=lambda e, id_ent=item['id'], nom=item['entidad']: self.ver_detalle(id_ent, nom)
+                            ft.Container(
+                                content=ft.ListTile(
+                                    title=ft.Text(item['entidad'], weight="bold"),
+                                    subtitle=ft.Text(f"{item['qq']:.0f} qq — {item['cantidad']} despachos"),
+                                    trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
+                                    on_click=lambda e, id_ent=item['id'], nom=item['entidad']: self.ver_detalle(id_ent, nom)
+                                ),
+                                bgcolor="surfacevariant",
+                                border_radius=8,
+                                border=ft.border.all(0.5, ft.Colors.OUTLINE_VARIANT),
                             )
                         )
         except Exception as e:

@@ -1,0 +1,151 @@
+============================================
+GUÍA DE INSTALACIÓN - AMIN CAMPO NUEVO APP
+============================================
+
+VERSIONES REQUERIDAS PARA DESARROLLO:
+
+1. PYTHON
+   - Versión: 3.11.x (recomendado)
+   - Descarga: https://www.python.org/downloads/
+
+2. JAVA (CRÍTICO - La versión correcta es esencial)
+   - Versión: JDK 17 (exactamente, no 18, 19, 20, 21, 22)
+   - Descarga: https://adoptium.net/temurin/releases/?version=17
+   - Instalador: Windows x64 JDK (archivo .msi)
+   - Ruta típica: C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot
+
+3. FLUTTER (SE INSTALA AUTOMÁTICAMENTE)
+   - Versión: 3.29.2 (lo descarga Flet al compilar)
+   - No requiere instalación manual
+
+4. DEPENDENCIAS DE PYTHON (desde requirements.txt)
+   - flet==0.28.3
+   - flet-map
+   - requests
+
+============================================
+PASOS DE INSTALACIÓN EN NUEVA COMPUTADORA:
+============================================
+
+PASO 1: Instalar Python 3.11
+   - Marcar "Add Python to PATH"
+   - Verificar: python --version
+
+PASO 2: Instalar JDK 17
+   - Descargar de Adoptium
+   - Instalar con opciones por defecto
+   - Verificar: java -version  (debe mostrar 17.x.x)
+
+PASO 3: Configurar JAVA_HOME (Importante)
+   - Abrir "Variables de entorno del sistema"
+   - Agregar variable: JAVA_HOME = C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot
+   - Editar PATH y agregar: %JAVA_HOME%\bin
+   - Cerrar y abrir terminal para aplicar cambios
+
+PASO 4: Clonar el proyecto
+   - git clone <url-del-repositorio>
+   - cd AminCampoNuevo2026Movil
+
+PASO 5: Crear entorno virtual
+   - python -m venv venv
+   - .\venv\Scripts\activate (Windows)
+   - source venv/bin/activate (Mac/Linux)
+
+PASO 6: Instalar dependencias
+   - pip install -r frontend\requirements.txt
+
+PASO 7: Verificar instalación
+   - flet --version (debe mostrar 0.28.3)
+   - java -version (debe mostrar 17)
+
+PASO 8: Configurar Java 17 en la sesión (si no está en PATH)
+   - $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot"
+   - $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+
+============================================
+PARA PROBAR LA APP:
+============================================
+
+# Ejecutar en modo desarrollo
+cd frontend
+flet run main.py
+
+# Compilar APK
+cd frontend
+flet build apk
+
+# El APK se genera en:
+frontend\build\apk\app-release.apk
+
+============================================
+SOLUCIÓN DE PROBLEMAS COMUNES:
+============================================
+
+ERROR: "flutter command not available"
+   SOLUCIÓN: Asegurar que JAVA_HOME apunta a JDK 17
+
+ERROR: "Unsupported class file major version 66"
+   SOLUCIÓN: Tenés Java 22 o superior. Instalar JDK 17.
+
+ERROR: "flet no se reconoce"
+   SOLUCIÓN: Activar entorno virtual: .\venv\Scripts\activate
+
+ERROR: "cannot find symbol SharedPreferencesPlugin"
+   SOLUCIÓN: Limpiar y recompilar:
+      - Eliminar carpetas: build, .flet
+      - flet build apk
+
+============================================
+VARIABLES DE ENTORNO RECOMENDADAS:
+============================================
+
+En Windows (permanentes):
+   JAVA_HOME = C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot
+   Path agregar: %JAVA_HOME%\bin
+
+En PowerShell (temporales para compilar):
+   $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot"
+   $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+
+============================================
+ESTRUCTURA DEL PROYECTO:
+============================================
+
+AminCampoNuevo2026Movil/
+├── frontend/
+│   ├── main.py
+│   ├── screens/
+│   ├── requirements.txt
+│   └── assets/
+├── venv/
+├── SETUP_GUIDE.txt
+└── README.md
+
+============================================
+NOTAS IMPORTANTES:
+============================================
+
+- NO instalar Flutter manualmente (Flet lo maneja)
+- NO usar JDK 22+ (causa errores de compilación)
+- Siempre activar el entorno virtual antes de ejecutar flet
+- La primera compilación tarda 5-10 minutos (descarga dependencias)
+- Si cambia la versión de Flet, verificar compatibilidad con flet-map
+
+============================================
+VERIFICACIÓN RÁPIDA (TODO OK debería mostrar):
+============================================
+
+> python --version
+Python 3.11.9
+
+> java -version
+openjdk version "17.0.19" 2025-01-21
+
+> flet --version
+0.28.3
+
+> pip list | findstr flet
+flet                      0.28.3
+flet-map                  0.1.0
+
+============================================

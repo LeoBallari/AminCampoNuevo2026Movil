@@ -10,7 +10,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 # API
 API_URL = "https://amincamponuevo2026movil.onrender.com"
 API_TIMEOUT = 60.0
-MAPTILER_API_KEY = "tn7F07rMO2N0LVRlRUmf"
+MAPTILER_API_KEY = "oJifcMZiDHLx4uf3iH0I"
 
 # Configuración de ventana
 WINDOW_WIDTH = 380
