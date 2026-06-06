@@ -281,7 +281,7 @@ class LoginScreen:
                                 ),
 
                                 ft.Text(
-                                    "Versión 2026",
+                                    "Versión 2026 / flet:0.85",
                                     color="#1565C0",
                                     size=14,
                                 ),

@@ -14,7 +14,7 @@ MAPTILER_API_KEY = "oJifcMZiDHLx4uf3iH0I"
 
 # Configuración de ventana
 WINDOW_WIDTH = 380
-WINDOW_HEIGHT = 800
+WINDOW_HEIGHT = 850
 
 # Temas
 APP_TITLE = "Campo Movil 2026"
