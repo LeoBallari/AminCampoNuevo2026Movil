@@ -89,6 +89,17 @@ class DespachosScreen:
         self.loading.visible = False
         self.page.update()
 
+    def _get_estado_color(self, estado):
+        """Retorna un color basado en el texto del estado"""
+        e = str(estado).upper()
+        if "CERTIFICADA" in e:
+            return ft.Colors.GREEN_600
+        elif "SIN CONFIRMAR" in e:
+            return ft.Colors.RED_600
+        elif "CORFIRMADA" in e:
+            return ft.Colors.ORANGE_700
+        return ft.Colors.BLUE_GREY_400
+
     def ver_detalle(self, id_entidad, nombre_entidad):
         """Carga y muestra la tabla de detalles para una entidad específica"""
         self.loading.visible = True
@@ -114,7 +125,12 @@ class DespachosScreen:
                             ft.DataCell(ft.Text(d.get('destino', 'N/A'), size=14)),
                             ft.DataCell(ft.Text(d.get('transporte', 'N/A'), size=14)),
                             ft.DataCell(ft.Text(d.get('patente', ''), size=14)),
-                            ft.DataCell(ft.Text(d.get('estado', '-'), size=14, weight="bold")),
+                            ft.DataCell(ft.Text(
+                                d.get('estado', '-'), 
+                                size=14, 
+                                weight="bold",
+                                color=self._get_estado_color(d.get('estado', '-'))
+                            )),
                         ]) for d in detalles
                     ]
                     
