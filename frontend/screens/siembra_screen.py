@@ -133,22 +133,33 @@ class SiembraScreen:
         self.page.update()
 
         try:
-            with httpx.Client() as client:
-                # Cargar Campañas
-                res_camp = client.get(f"{API_URL}/api/campañas", timeout=10)
-                if res_camp.status_code == 200:
-                    campanas = res_camp.json()
-                    self.dd_campana.options = [
-                        ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in campanas
-                    ]
-                
-                # Cargar Cultivos
-                res_cult = client.get(f"{API_URL}/api/cultivos", timeout=10)
-                if res_cult.status_code == 200:
-                    cultivos = res_cult.json()
-                    self.dd_cultivo.options = [
-                        ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in cultivos
-                    ]
+            # Intentar obtener de la sesión global (precargado en main.py)
+            campanas = self.page.session.get("global_campanas")
+            cultivos = self.page.session.get("global_cultivos")
+
+            # Si no están en sesión, pedirlos a la API
+            if not campanas or not cultivos:
+                with httpx.Client() as client:
+                    if not campanas:
+                        res = client.get(f"{API_URL}/api/campañas", timeout=10)
+                        if res.status_code == 200:
+                            campanas = res.json()
+                            self.page.session.set("global_campanas", campanas)
+                    
+                    if not cultivos:
+                        res = client.get(f"{API_URL}/api/cultivos", timeout=10)
+                        if res.status_code == 200:
+                            cultivos = res.json()
+                            self.page.session.set("global_cultivos", cultivos)
+
+            if campanas:
+                self.dd_campana.options = [
+                    ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in campanas
+                ]
+            if cultivos:
+                self.dd_cultivo.options = [
+                    ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in cultivos
+                ]
 
         except Exception as e:
             pass

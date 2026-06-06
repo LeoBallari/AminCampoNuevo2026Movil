@@ -3,12 +3,14 @@ Punto de entrada de la aplicación
 Aplicación móvil Campo 2026 - Login y Menú
 """
 import flet as ft
-from config import BASE_DIR, APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT
+from config import BASE_DIR, APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT, API_URL
 from screens.login_screen import LoginScreen
 import sys
 from screens.menu_screen import MenuScreen
 from screens.config_screen import ConfigScreen
 import os
+import threading
+import httpx
 
 class App:
     """Controlador principal de la aplicación"""
@@ -46,6 +48,25 @@ class App:
         # Asignar eventos de navegación
         self.page.on_route_change = self.on_route_change
         self.page.on_view_pop = self.on_view_pop
+
+        # Iniciar carga de datos globales en segundo plano para acelerar los filtros
+        threading.Thread(target=self._pre_cargar_filtros, daemon=True).start()
+
+    def _pre_cargar_filtros(self):
+        """Carga campañas y cultivos en la sesión para acceso rápido en toda la app"""
+        try:
+            with httpx.Client() as client:
+                # Cargar Campañas
+                res_camp = client.get(f"{API_URL}/api/campañas", timeout=15)
+                if res_camp.status_code == 200:
+                    self.page.session.set("global_campanas", res_camp.json())
+                
+                # Cargar Cultivos
+                res_cult = client.get(f"{API_URL}/api/cultivos", timeout=15)
+                if res_cult.status_code == 200:
+                    self.page.session.set("global_cultivos", res_cult.json())
+        except Exception as e:
+            print(f"Error pre-cargando filtros globales: {e}")
         
     def on_login_success(self, usuario_nombre: str):
         """Callback cuando el login es exitoso"""
