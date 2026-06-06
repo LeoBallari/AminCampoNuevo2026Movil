@@ -18,7 +18,7 @@ class LoginScreen:
         self.on_login_success = on_login_success
         
     def show(self):
-        """Prepara y devuelve la vista de la pantalla de login"""
+        """Prepara y devuelve la vista de la pantalla del login"""
         # Eliminamos self.page.clean() ya que Flet maneja la limpieza mediante rutas
         
         creds_path = os.path.join(BASE_DIR, "credentials.json")

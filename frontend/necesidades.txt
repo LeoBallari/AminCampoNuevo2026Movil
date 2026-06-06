@@ -72,7 +72,7 @@ flet run main.py
 
 # Compilar APK
 cd frontend
-flet build apk
+flet build apk --product "CampoMovil" --org "com.amin.campomovil"
 
 # El APK se genera en:
 frontend\build\apk\app-release.apk
