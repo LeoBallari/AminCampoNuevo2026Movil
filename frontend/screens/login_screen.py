@@ -4,7 +4,6 @@ Pantalla de Login - Adaptada a Vistas Modernas y Segura para Android
 import flet as ft
 import threading
 import os
-import json
 import time
 from config import BASE_DIR
 from services.auth_service import AuthService
@@ -20,8 +19,6 @@ class LoginScreen:
     def show(self):
         """Prepara y devuelve la vista de la pantalla del login"""
         # Eliminamos self.page.clean() ya que Flet maneja la limpieza mediante rutas
-        
-        creds_path = os.path.join(BASE_DIR, "credentials.json")
 
         # Elementos de UI
         txt_user = ft.TextField(
@@ -49,15 +46,12 @@ class LoginScreen:
         chk_remember = ft.Checkbox(label="Recordar credenciales", value=False)
 
         # Cargar credenciales guardadas si existen
-        if os.path.exists(creds_path):
-            try:
-                with open(creds_path, "r", encoding="utf-8") as f:
-                    saved_data = json.load(f)
-                    txt_user.value = saved_data.get("usuario", "")
-                    txt_pass.value = saved_data.get("contraseña", "")
-                    chk_remember.value = True
-            except Exception:
-                pass
+        saved_user = self.page.client_storage.get("user_login")
+        saved_pass = self.page.client_storage.get("user_pass")
+        if saved_user and saved_pass:
+            txt_user.value = saved_user
+            txt_pass.value = saved_pass
+            chk_remember.value = True
 
         status_text = ft.Text(
             "",
@@ -95,11 +89,11 @@ class LoginScreen:
                 self.page.update()
                 
                 if remember_val:
-                    with open(creds_path, "w", encoding="utf-8") as f:
-                        json.dump({"usuario": user_val, "contraseña": pass_val}, f)
+                    self.page.client_storage.set("user_login", user_val)
+                    self.page.client_storage.set("user_pass", pass_val)
                 else:
-                    if os.path.exists(creds_path):
-                        os.remove(creds_path)
+                    self.page.client_storage.remove("user_login")
+                    self.page.client_storage.remove("user_pass")
 
                 time.sleep(0.5)  # Un mini delay para ver el cartel
                 
@@ -133,11 +127,11 @@ class LoginScreen:
                 
                 if result['success']:
                     if remember_val:
-                        with open(creds_path, "w", encoding="utf-8") as f:
-                            json.dump({"usuario": user_val, "contraseña": pass_val}, f)
+                        self.page.client_storage.set("user_login", user_val)
+                        self.page.client_storage.set("user_pass", pass_val)
                     else:
-                        if os.path.exists(creds_path):
-                            os.remove(creds_path)
+                        self.page.client_storage.remove("user_login")
+                        self.page.client_storage.remove("user_pass")
 
                     time.sleep(1.0)
                     if self.on_login_success:
