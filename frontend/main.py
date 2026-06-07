@@ -28,6 +28,7 @@ class App:
         self.siembra_screen = None
         self.lotes_screen = None
         self.fertilizacion_screen = None
+        self.estadisticas_screen = None
         
         # Configurar página usando la sintaxis moderna para Windows
         self.page.title = APP_TITLE
@@ -129,6 +130,12 @@ class App:
                 from screens.fertilizacion_screen import FertilizacionScreen
                 self.fertilizacion_screen = FertilizacionScreen(self.page)
             self.page.views.append(self.fertilizacion_screen.show())
+            
+        elif self.page.route == "/estadisticas":
+            if not self.estadisticas_screen:
+                from screens.estadisticas_screen import EstadisticasScreen
+                self.estadisticas_screen = EstadisticasScreen(self.page)
+            self.page.views.append(self.estadisticas_screen.show())
 
         elif self.page.route == "/despachos/detalle":
             # La vista de detalle ya se construye desde DespachosScreen.

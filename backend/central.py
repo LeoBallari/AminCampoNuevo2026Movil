@@ -6,6 +6,7 @@ from routes.despachos_routes import despachos_bp
 from routes.cosecha_routes import cosecha_bp
 from routes.siembra_routes import siembra_bp
 from routes.lotes_routes import lotes_bp
+from routes.estadisticas_routes import estadisticas_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -16,6 +17,7 @@ app.register_blueprint(despachos_bp)
 app.register_blueprint(cosecha_bp)
 app.register_blueprint(siembra_bp)
 app.register_blueprint(lotes_bp)
+app.register_blueprint(estadisticas_bp)  # Agrega el blueprint de estadísticas
 
 @app.route('/api/health', methods=['GET'])
 def health():
