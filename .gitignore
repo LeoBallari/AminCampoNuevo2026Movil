@@ -1,9 +1,6 @@
 .venv/
-.venv_nuevo/
 venv/
 build/
 __pycache__/
 .pytest_cache/
 *.pyc
-credentials.json
-venv_nuevo/
