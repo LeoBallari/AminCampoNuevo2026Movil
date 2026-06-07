@@ -41,8 +41,6 @@ class App:
         if self.page.platform in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
             # Activa Modo Inmersivo (oculta barras de estado y navegación)
             self.page.window.full_screen = True
-            # Bloquear la orientación a solo vertical hacia arriba
-            self.page.window.allowed_orientations = [ft.WindowOrientation.PORTRAIT_UP]
         else:
             # Configuración solo para Desktop
             self.page.window.width = WINDOW_WIDTH
@@ -75,6 +73,7 @@ class App:
                 res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=15)
                 if res_lotes.status_code == 200:
                     self.page.session.set("global_lotes_unificados", res_lotes.json())
+                print("DEBUG: Filtros globales pre-cargados exitosamente")
         except Exception as e:
             print(f"Error pre-cargando filtros globales: {e}")
         

@@ -39,19 +39,21 @@ def get_cultivos():
 
 @estadisticas_bp.route('/api/estadisticas', methods=['GET'])
 def get_estadisticas():
-    lote = request.args.get('id_campana')
+    lotes_raw = request.args.get('lotes')
     id_cultivo = request.args.get('id_cultivo')
     
-    if not id_cultivo or not lote:
+    if not id_cultivo or not lotes_raw:
         return jsonify([])
 
     try:
-        conn = obtener_conexion()
-        cursor = conn.cursor()
-        
-        # DECLARE @nombre VARCHAR(100) = 'quiroga';  -- Lo que elige el usuario
-        # DECLARE @cultivo_nombre VARCHAR(50) = 'maiz';       -- Lo que elige el usuario
-            
+        # Procesar la lista de lotes recibida por coma (CSV)
+        lotes_list = [x.strip() for x in lotes_raw.split(',') if x.strip()]
+        if not lotes_list:
+            return jsonify([])
+
+        # Generar marcadores de posición dinámicos (%s, %s, ...)
+        placeholders = ', '.join(['%s'] * len(lotes_list))
+
         query = """
             WITH CosechaTotal AS (
                 SELECT 
@@ -69,43 +71,71 @@ def get_estadisticas():
                     AND tc.has > 0
                 GROUP BY 
                     tc.id_cosecha, tc.id_bloque_produccion, tc.has, tc.id_cultivo
+            ),
+            DatosAgrupados AS (
+                SELECT 
+                    c.id_campaña,
+                    c.nombre AS CAMPAÑA,
+                    b.nombre_bloque AS BLOQUE,
+                    cu.id_cultivo,
+                    cu.nombre_cultivo AS CULTIVO,
+                    SUM(ct.total_kg) AS TOTAL_KG,
+                    SUM(ct.has) AS TOTAL_HECTAREAS,
+                    COUNT(DISTINCT ct.id_cosecha) AS CANTIDAD_COSECHAS
+                FROM 
+                    CosechaTotal ct
+                INNER JOIN 
+                    v2.BloquesProduccion bp ON ct.id_bloque_produccion = bp.id_bloque_produccion AND bp.activo = 1
+                INNER JOIN 
+                    v2.Campañas c ON bp.id_campaña = c.id_campaña
+                INNER JOIN 
+                    v2.Bloques b ON bp.id_bloque = b.id_bloque
+                INNER JOIN 
+                    v2.Cultivos cu ON ct.id_cultivo = cu.id_cultivo
+                WHERE 
+                    cu.nombre_cultivo = %s
+                    AND (
+                        b.nombre_bloque IN ({placeholders})
+                        OR EXISTS (
+                            SELECT 1 
+                            FROM v2.Bloque_Lotes bl 
+                            INNER JOIN v2.Lotes l ON bl.id_lote = l.id_lote
+                            WHERE bl.id_bloque = b.id_bloque 
+                            AND l.nombre_lote IN ({placeholders})
+                        )
+                    )
+                GROUP BY 
+                    c.id_campaña, c.nombre, b.nombre_bloque, cu.id_cultivo, cu.nombre_cultivo
             )
             SELECT 
-                c.nombre AS CAMPAÑA,
-                b.nombre_bloque AS BLOQUE,
-                cu.nombre_cultivo AS CULTIVO,
-                SUM(ct.total_kg) AS TOTAL_KG,
-                AVG(ct.has) AS TOTAL_HECTAREAS,
-                CAST(ROUND((SUM(ct.total_kg) / NULLIF(AVG(ct.has), 0)) / 100.0, 2) AS DECIMAL(10,2)) AS RINDE_QQ_HAS,
-                COUNT(DISTINCT ct.id_cosecha) AS CANTIDAD_COSECHAS
+                CAMPAÑA,
+                STUFF((
+                    SELECT ', ' + BLOQUE
+                    FROM DatosAgrupados d2
+                    WHERE d2.id_campaña = d1.id_campaña
+                    AND d2.id_cultivo = d1.id_cultivo
+                    FOR XML PATH('')
+                ), 1, 2, '') AS BLOQUES,
+                CULTIVO,
+                SUM(TOTAL_KG) AS TOTAL_KG,
+                SUM(TOTAL_HECTAREAS) AS TOTAL_HECTAREAS,
+                CAST(ROUND((SUM(TOTAL_KG) / NULLIF(SUM(TOTAL_HECTAREAS), 0)) / 100.0, 2) AS DECIMAL(10,2)) AS RINDE_PROMEDIO_QQ_HAS,
+                SUM(CANTIDAD_COSECHAS) AS CANTIDAD_COSECHAS
             FROM 
-                CosechaTotal ct
-            INNER JOIN 
-                v2.BloquesProduccion bp ON ct.id_bloque_produccion = bp.id_bloque_produccion AND bp.activo = 1
-            INNER JOIN 
-                v2.Campañas c ON bp.id_campaña = c.id_campaña
-            INNER JOIN 
-                v2.Bloques b ON bp.id_bloque = b.id_bloque
-            INNER JOIN 
-                v2.Cultivos cu ON ct.id_cultivo = cu.id_cultivo
-            WHERE 
-                cu.nombre_cultivo = %s
-                AND (
-                    b.nombre_bloque = %s
-                    OR EXISTS (
-                        SELECT 1 
-                        FROM v2.Bloque_Lotes bl 
-                        INNER JOIN v2.Lotes l ON bl.id_lote = l.id_lote
-                        WHERE bl.id_bloque = b.id_bloque AND l.nombre_lote = %s
-                    )
-                )
+                DatosAgrupados d1
             GROUP BY 
-                c.nombre, b.nombre_bloque, cu.nombre_cultivo
+                id_campaña, CAMPAÑA, id_cultivo, CULTIVO
             ORDER BY 
-                c.nombre;
-        """
-        # Se necesitan 3 parámetros para los 3 '%s' en el WHERE
-        cursor.execute(query, (id_cultivo, lote, lote))
+                CAMPAÑA;
+        """.replace("{placeholders}", placeholders)
+
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+
+        # Parámetros: cultivo + lista de lotes (para el bloque) + lista de lotes (para el lote individual)
+        params = [id_cultivo] + lotes_list + lotes_list
+        cursor.execute(query, params)
+        
         rows = cursor.fetchall()
         conn.close()
         return jsonify([{
