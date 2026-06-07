@@ -41,7 +41,14 @@ class App:
         self.page.title = APP_TITLE
         
         # Cargar tema guardado persistentemente
-        saved_theme = self.page.client_storage.get("theme_mode")
+        try:
+            saved_theme = self.page.client_storage.get("theme_mode")
+        except AttributeError:
+            try:
+                saved_theme = self.page.storage.client.get("theme_mode")
+            except AttributeError:
+                saved_theme = None
+                
         self.page.theme_mode = saved_theme if saved_theme else THEME_MODE
 
         self.page.window.width = WINDOW_WIDTH
@@ -58,21 +65,25 @@ class App:
         self.page.on_view_pop = self.on_view_pop
 
         # Iniciar carga de datos globales en segundo plano para acelerar los filtros
-        threading.Thread(target=self._pre_cargar_filtros, daemon=True).start()
+        #threading.Thread(target=self._pre_cargar_filtros, daemon=True).start()
 
     def _pre_cargar_filtros(self):
-        """Carga campañas y cultivos en la sesión para acceso rápido en toda la app"""
+        """Carga campaigns y cultivos en la memoria de la página para acceso rápido"""
         try:
             with httpx.Client() as client:
+                # Asegurar que page.data sea un diccionario
+                if self.page.data is None:
+                    self.page.data = {}
+                    
                 # Cargar Campañas
                 res_camp = client.get(f"{API_URL}/api/campañas", timeout=API_TIMEOUT)
                 if res_camp.status_code == 200:
-                    self.page.session.set("global_campanas", res_camp.json())
+                    self.page.data["global_campanas"] = res_camp.json()
                 
                 # Cargar Cultivos
                 res_cult = client.get(f"{API_URL}/api/cultivos", timeout=API_TIMEOUT)
                 if res_cult.status_code == 200:
-                    self.page.session.set("global_cultivos", res_cult.json())
+                    self.page.data["global_cultivos"] = res_cult.json()
         except Exception as e:
             print(f"Error pre-cargando filtros globales: {e}")
         
@@ -125,12 +136,13 @@ class App:
     
     def run(self):
         """Inicia la aplicación navegando a la raíz"""
-        self.page.go("/")
+        self.page.route = "/"
 
 def main(page: ft.Page):
     """Función principal - punto de entrada de Flet"""
     app = App(page)
+    # ELIMINÁ o comentá la línea vieja de ft.app(target=main) que estaba acá colgada
     app.run()
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)

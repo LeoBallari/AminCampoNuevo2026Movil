@@ -3,15 +3,7 @@ Punto de entrada de la aplicación
 Aplicación móvil Campo 2026 - Login y Menú
 """
 import flet as ft
-from config import (
-    BASE_DIR, 
-    APP_TITLE, 
-    THEME_MODE, 
-    WINDOW_WIDTH, 
-    WINDOW_HEIGHT, 
-    API_URL, 
-    API_TIMEOUT
-)
+from config import BASE_DIR, APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT, API_URL
 from screens.login_screen import LoginScreen
 import sys
 from screens.menu_screen import MenuScreen
@@ -65,12 +57,12 @@ class App:
         try:
             with httpx.Client() as client:
                 # Cargar Campañas
-                res_camp = client.get(f"{API_URL}/api/campañas", timeout=API_TIMEOUT)
+                res_camp = client.get(f"{API_URL}/api/campañas", timeout=15)
                 if res_camp.status_code == 200:
                     self.page.session.set("global_campanas", res_camp.json())
                 
                 # Cargar Cultivos
-                res_cult = client.get(f"{API_URL}/api/cultivos", timeout=API_TIMEOUT)
+                res_cult = client.get(f"{API_URL}/api/cultivos", timeout=15)
                 if res_cult.status_code == 200:
                     self.page.session.set("global_cultivos", res_cult.json())
         except Exception as e:
