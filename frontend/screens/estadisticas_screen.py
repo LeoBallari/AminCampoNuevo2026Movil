@@ -11,12 +11,22 @@ class EstadisticasScreen:
         # Controles que necesitamos acceder desde distintos métodos
         self.dd_lote = ft.Dropdown(label="Lote / Bloque", expand=True, on_change=self.on_filter_change)
         self.dd_cultivo = ft.Dropdown(label="Cultivo", expand=True, on_change=self.on_filter_change)
-        self.loading = ft.ProgressBar(visible=False, color=ft.Colors.AMBER_400)
-        self.lv_resumen = ft.ListView(expand=True, spacing=8, padding=ft.padding.only(bottom=20))
+        self.loading = ft.ProgressBar(visible=False, color=ft.Colors.BLUE_400)
+        self.lv_resumen = ft.ListView(expand=True, spacing=0, padding=ft.padding.only(bottom=20))
+        
+        # Contenedor para el gráfico
+        self.chart_container = ft.Container(
+            content=ft.Text("Seleccione filtros para visualizar el gráfico", color=ft.Colors.BLUE_GREY_400, italic=True),
+            height=200,
+            alignment=ft.alignment.center,
+            padding=20,
+            bgcolor="surfacevariant",
+            border_radius=10,
+        )
         
         # Controles para el footer (ahora por separado para dos renglones)
         self.txt_total_kg = ft.Text("0 kg", color=ft.Colors.WHITE, weight="bold", size=16)
-        self.txt_avg_rinde = ft.Text("0.0 qq/ha", color=ft.Colors.AMBER_200, weight="w-500", size=14)
+        self.txt_avg_rinde = ft.Text("0.0 qq/ha", color=ft.Colors.BLUE_200, weight="w500", size=14)
 
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""
@@ -27,6 +37,7 @@ class EstadisticasScreen:
         """Carga las estadísticas históricas desde la API"""
         self.loading.visible = True
         self.lv_resumen.controls.clear()
+        self.chart_container.content = ft.ProgressRing(width=30, height=30, stroke_width=3)
         self.page.update()
 
         try:
@@ -46,6 +57,10 @@ class EstadisticasScreen:
                                 padding=30, alignment=ft.alignment.center
                             )
                         )
+                        self.chart_container.content = ft.Text(
+                            "Sin datos para el gráfico", 
+                            color=ft.Colors.BLUE_GREY_400
+                        )
                         self.loading.visible = False
                         self.page.update()
                         return
@@ -58,42 +73,68 @@ class EstadisticasScreen:
                     self.txt_total_kg.value = f"{total_kg:,.0f} kg"
                     self.txt_avg_rinde.value = f"Promedio: {avg_rinde:.2f} qq/ha"
 
+                    # --- Lógica del Gráfico de Barras ---
+                    bar_groups = []
+                    chart_labels = []
+                    max_rinde = 0
+
+                    for i, it in enumerate(datos):
+                        rinde = float(it.get('rinde', 0))
+                        if rinde > max_rinde: max_rinde = rinde
+                        
+                        bar_groups.append(
+                            ft.BarChartGroup(
+                                x=i,
+                                bar_rods=[
+                                    ft.BarChartRod(
+                                        from_y=0,
+                                        to_y=rinde,
+                                        width=16,
+                                        color=ft.Colors.BLUE_400,
+                                        tooltip=f"{it.get('campaña')}: {rinde:.2f} qq/ha",
+                                        border_radius=10,
+                                    )
+                                ],
+                            )
+                        )
+                        chart_labels.append(
+                            ft.ChartAxisLabel(
+                                value=i, 
+                                label=ft.Container(ft.Text(it.get('campaña', '')[-5:], size=10), padding=5)
+                            )
+                        )
+
+                    self.chart_container.content = ft.BarChart(
+                        bar_groups=bar_groups,
+                        bottom_axis=ft.ChartAxis(labels=chart_labels, labels_size=30),
+                        left_axis=ft.ChartAxis(labels_size=0),
+                        max_y=max_rinde * 1.2 if max_rinde > 0 else 100,
+                        interactive=True,
+                        expand=True,
+                    )
+
                     for it in datos:
                         rinde = float(it.get('rinde', 0))
                         produccion = float(it.get('total_kg', 0))
-                        
-                        # Tarjeta por Campaña
+                        has = float(it.get('has', 0))
+
+                        # Fila de detalle (Fondo blanco con etiqueta resaltada para rinde)
                         self.lv_resumen.controls.append(
                             ft.Container(
-                                content=ft.Column([
-                                    # Línea 1: CAMPAÑA Y RINDE
-                                    ft.Row([
-                                        ft.Text(it.get('campaña', 'S/D'), size=16, weight="bold", expand=True),
-                                        ft.Container(
-                                            content=ft.Text(f"{rinde:.2f} qq/ha", size=14, weight="bold", color=ft.Colors.WHITE),
-                                            bgcolor=ft.Colors.GREEN_700,
-                                            padding=ft.padding.symmetric(horizontal=8, vertical=2),
-                                            border_radius=5
-                                        ),
-                                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                                    
-                                    # Línea 2: Detalles técnicos
-                                    ft.Row([
-                                        ft.Column([
-                                            ft.Text("Superficie", size=12, color=ft.Colors.BLUE_GREY_400),
-                                            ft.Text(f"{float(it.get('has', 0)):.1f} has", size=14, weight="w-500"),
-                                        ], spacing=1, expand=True),
-                                        ft.Column([
-                                            ft.Text("Producción Total", size=12, color=ft.Colors.BLUE_GREY_400),
-                                            ft.Text(f"{produccion:,.0f} kg", size=14, weight="w-500"),
-                                        ], spacing=1, expand=True, horizontal_alignment=ft.CrossAxisAlignment.END),
-                                    ]),
-                                    ft.Text(f"Bloque: {it.get('bloque')} • {it.get('cantidad')} registros", size=12, italic=True, color=ft.Colors.BLUE_GREY_300)
-                                ], spacing=2),
-                                padding=ft.padding.symmetric(horizontal=12, vertical=10),
-                                bgcolor="surfacevariant",
-                                border_radius=8,
-                                border=ft.border.all(0.5, ft.Colors.OUTLINE_VARIANT),
+                                content=ft.Row([
+                                    ft.Text(it.get('campaña', 'S/D'), size=13, weight="bold", expand=1.2),
+                                    ft.Text(f"{produccion:,.0f} kg", size=13, expand=1.5, text_align=ft.TextAlign.CENTER),
+                                    ft.Text(f"{has:.1f} ha", size=13, expand=1, text_align=ft.TextAlign.CENTER),
+                                    ft.Container(
+                                        content=ft.Text(f"{rinde:.2f} qq", size=12, weight="bold", color=ft.Colors.WHITE),
+                                        bgcolor=ft.Colors.BLUE_700,
+                                        padding=ft.padding.symmetric(horizontal=8, vertical=4),
+                                        border_radius=5,
+                                    ),
+                                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                                padding=ft.padding.symmetric(horizontal=10, vertical=12),
+                                bgcolor=ft.Colors.WHITE,
+                                border=ft.border.only(bottom=ft.BorderSide(0.5, ft.Colors.OUTLINE_VARIANT)),
                             )
                         )
                 else:
@@ -104,7 +145,6 @@ class EstadisticasScreen:
         self.loading.visible = False
         self.page.update()
 
-
     def cargar_filtros(self):
         """Descarga los datos para los dropdowns desde la API"""
         self.loading.visible = True
@@ -113,10 +153,14 @@ class EstadisticasScreen:
         try:
             with httpx.Client() as client:
                 # 1. Obtener Lotes/Bloques
-                # Usamos la nueva ruta única para evitar conflictos
-                res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=API_TIMEOUT)
-                if res_lotes.status_code == 200:
-                    lotes = res_lotes.json()
+                lotes = self.page.session.get("global_lotes_unificados")
+                if not lotes:
+                    res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=API_TIMEOUT)
+                    if res_lotes.status_code == 200:
+                        lotes = res_lotes.json()
+                        self.page.session.set("global_lotes_unificados", lotes)
+
+                if lotes:
                     # Limpiamos opciones previas antes de cargar nuevas
                     self.dd_lote.options = []
                     self.dd_lote.options = [
@@ -174,9 +218,21 @@ class EstadisticasScreen:
                         ], spacing=10),
                         
                         ft.Divider(),
+                        #ft.Text("Evolución de Rinde (qq/ha)", size=16, weight="bold"),
+                        self.chart_container,
                         
-                        # Contenedor dinámico de vistas
-                        ft.Text("Listado de Lotes", size=16, weight="bold"),
+                        #ft.Text("Detalle por Campaña", size=16, weight="bold"),
+                        # Encabezado de la lista
+                        ft.Container(
+                            content=ft.Row([
+                                ft.Text("Campaña", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", expand=1.2),
+                                ft.Text("Producción", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", expand=1.5, text_align=ft.TextAlign.CENTER),
+                                ft.Text("Has", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", expand=1, text_align=ft.TextAlign.CENTER),
+                                ft.Text("Rinde", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", width=65, text_align=ft.TextAlign.CENTER),
+                            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                            padding=ft.padding.symmetric(horizontal=10, vertical=8),
+                            bgcolor=ft.Colors.GREY_50,
+                        ),
                         self.lv_resumen
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.START,
@@ -185,8 +241,8 @@ class EstadisticasScreen:
                 # Footer Estetico con el resumen de totales
                 UIStyles.get_footer_container(
                     ft.Column([
-                        ft.Row([ft.Text("PRODUCCIÓN TOTAL", color=ft.Colors.AMBER_200, size=12, weight="bold"), self.txt_total_kg], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                        ft.Row([ft.Text("RENDIMIENTO HISTÓRICO", color=ft.Colors.AMBER_200, size=12, weight="bold"), self.txt_avg_rinde], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                        ft.Row([ft.Text("PRODUCCIÓN TOTAL", color=ft.Colors.BLUE_200, size=12, weight="bold"), self.txt_total_kg], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                        ft.Row([ft.Text("RENDIMIENTO HISTÓRICO", color=ft.Colors.BLUE_200, size=12, weight="bold"), self.txt_avg_rinde], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ], spacing=2, tight=True)
                 )
             ]

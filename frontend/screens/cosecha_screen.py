@@ -16,7 +16,7 @@ class CosechaScreen:
         
         # Controles para el footer (ahora por separado para dos renglones)
         self.txt_total_qq = ft.Text("0 qq", color=ft.Colors.WHITE, weight="bold", size=16)
-        self.txt_total_avg = ft.Text("0.0 qq/ha", color=ft.Colors.BLUE_200, weight="w-500", size=14)
+        self.txt_total_avg = ft.Text("0.0 qq/ha", color=ft.Colors.BLUE_200, weight="w500", size=14)
 
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""

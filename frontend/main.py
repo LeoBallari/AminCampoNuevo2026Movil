@@ -37,14 +37,18 @@ class App:
         saved_theme = self.page.client_storage.get("theme_mode")
         self.page.theme_mode = saved_theme if saved_theme else THEME_MODE
 
-        self.page.window.width = WINDOW_WIDTH
-        self.page.window.height = WINDOW_HEIGHT
-        self.page.window.resizable = False
-        # Icono para la ventana de escritorio
-        self.page.window.icon = os.path.join("assets", "icon.png")
-
-        if self.page.platform == ft.PagePlatform.ANDROID:
+        # Configuración por plataforma
+        if self.page.platform in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
+            # Activa Modo Inmersivo (oculta barras de estado y navegación)
             self.page.window.full_screen = True
+            # Bloquear la orientación a solo vertical hacia arriba
+            self.page.window.allowed_orientations = [ft.WindowOrientation.PORTRAIT_UP]
+        else:
+            # Configuración solo para Desktop
+            self.page.window.width = WINDOW_WIDTH
+            self.page.window.height = WINDOW_HEIGHT
+            self.page.window.resizable = False
+            self.page.window.icon = os.path.join("assets", "icon.png")
         
         # Asignar eventos de navegación
         self.page.on_route_change = self.on_route_change
@@ -66,6 +70,11 @@ class App:
                 res_cult = client.get(f"{API_URL}/api/cultivos", timeout=15)
                 if res_cult.status_code == 200:
                     self.page.session.set("global_cultivos", res_cult.json())
+
+                # Cargar Lotes Unificados para Estadísticas
+                res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=15)
+                if res_lotes.status_code == 200:
+                    self.page.session.set("global_lotes_unificados", res_lotes.json())
         except Exception as e:
             print(f"Error pre-cargando filtros globales: {e}")
         

@@ -186,10 +186,10 @@ class MenuScreen:
                 # Footer Fijo
                 ft.Container(
                     height=100,  # Aumentamos para compensar el área segura de Android
-                    bgcolor="surface", # Color adaptable al tema
+                    bgcolor=ft.Colors.SURFACE, 
                     padding=ft.padding.only(left=40, right=40, top=5, bottom=20),
                     border_radius=ft.border_radius.only(top_left=20, top_right=20),
-                    border=ft.border.only(top=ft.BorderSide(0.5, "outlinevariant")),
+                    border=ft.border.only(top=ft.BorderSide(0.5, ft.Colors.OUTLINE_VARIANT)),
                     shadow=ft.BoxShadow(
                         spread_radius=1,
                         blur_radius=15,
@@ -202,8 +202,8 @@ class MenuScreen:
                             ft.Container(
                                 content=ft.Column(
                                     [
-                                        ft.Icon(ft.Icons.PERSON_OUTLINE, color="onsurface", size=28),
-                                        ft.Text("Perfil", size=10, weight=ft.FontWeight.W_500, color="onsurface"),
+                                            ft.Icon(ft.Icons.PERSON_OUTLINE, color=ft.Colors.ON_SURFACE, size=28),
+                                            ft.Text("Perfil", size=10, weight=ft.FontWeight.W_500, color=ft.Colors.ON_SURFACE),
                                     ],
                                     spacing=1,
                                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -217,8 +217,8 @@ class MenuScreen:
                             ft.Container(
                                 content=ft.Column(
                                     [
-                                        ft.Icon(ft.Icons.SETTINGS_OUTLINED, color="onsurface", size=28),
-                                        ft.Text("Ajustes", size=10, weight=ft.FontWeight.W_500, color="onsurface"),
+                                        ft.Icon(ft.Icons.SETTINGS_OUTLINED, color=ft.Colors.ON_SURFACE, size=28),
+                                        ft.Text("Ajustes", size=10, weight=ft.FontWeight.W_500, color=ft.Colors.ON_SURFACE),
                                     ],
                                     spacing=1,
                                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,

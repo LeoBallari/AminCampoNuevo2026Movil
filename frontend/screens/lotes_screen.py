@@ -15,7 +15,7 @@ class LotesScreen:
         
         # Controles para el footer (ahora por separado para dos renglones)
         self.txt_total_has = ft.Text("0 has", color=ft.Colors.WHITE, weight="bold", size=16)
-        self.txt_total_lotes = ft.Text("0 lotes", color=ft.Colors.BLUE_200, weight="w-500", size=14)
+        self.txt_total_lotes = ft.Text("0 lotes", color=ft.Colors.BLUE_200, weight="w500", size=14)
 
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""
@@ -77,7 +77,7 @@ class LotesScreen:
                                 padding=ft.padding.symmetric(horizontal=12, vertical=10),
                                 bgcolor="surfacevariant",
                                 border_radius=8,
-                                border=ft.border.all(0.5, ft.Colors.OUTLINE_VARIANT),
+                                border=ft.border.all(0.5, ft.colors.OUTLINE_VARIANT),
                             )
                         )
                 else:
