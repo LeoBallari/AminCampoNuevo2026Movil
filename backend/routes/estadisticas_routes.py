@@ -5,7 +5,7 @@ estadisticas_bp = Blueprint('estadisticas', __name__)
 
 @estadisticas_bp.route('/api/estadisticas/lotes', methods=['GET'])
 def get_lotes_unificados():
-    query = """
+    query0 = """
         SELECT DISTINCT Nombre
         FROM (
             SELECT nombre_lote AS Nombre FROM v2.Lotes WHERE nombre_lote IS NOT NULL
@@ -14,6 +14,39 @@ def get_lotes_unificados():
         ) AS NombresUnificados
         WHERE Nombre <> ''
         ORDER BY Nombre;
+    """
+    query = """
+        SELECT DISTINCT
+            Nombre
+        FROM (
+            -- Lotes que tienen cosecha
+            SELECT DISTINCT
+                l.nombre_lote AS Nombre
+            FROM 
+                v2.Lotes l
+            INNER JOIN 
+                v2.Bloque_Lotes bl ON l.id_lote = bl.id_lote
+            INNER JOIN 
+                v2.BloquesProduccion bp ON bl.id_bloque = bp.id_bloque AND bp.activo = 1
+            INNER JOIN 
+                v2.TareaCosecha tc ON bp.id_bloque_produccion = tc.id_bloque_produccion
+            
+            UNION
+            
+            -- Bloques que tienen cosecha
+            SELECT DISTINCT
+                b.nombre_bloque AS Nombre
+            FROM 
+                v2.Bloques b
+            INNER JOIN 
+                v2.BloquesProduccion bp ON b.id_bloque = bp.id_bloque AND bp.activo = 1
+            INNER JOIN 
+                v2.TareaCosecha tc ON bp.id_bloque_produccion = tc.id_bloque_produccion
+        ) AS NombresConCosecha
+        WHERE 
+            Nombre IS NOT NULL AND Nombre <> ''
+        ORDER BY 
+            Nombre;    
     """
     try:
         conn = obtener_conexion()

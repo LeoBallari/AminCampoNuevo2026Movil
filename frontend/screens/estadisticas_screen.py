@@ -101,7 +101,7 @@ class EstadisticasScreen:
             title=ft.Text("Seleccionar Lotes"),
             content=ft.Container(
                 content=ft.Column(checks, scroll=ft.ScrollMode.AUTO, tight=True),
-                height=300,
+                height=350,
                 width=300,
             ),
             actions=[
