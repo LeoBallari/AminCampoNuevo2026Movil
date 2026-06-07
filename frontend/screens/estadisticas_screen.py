@@ -113,7 +113,8 @@ class EstadisticasScreen:
         try:
             with httpx.Client() as client:
                 # 1. Obtener Lotes/Bloques
-                res_lotes = client.get(f"{API_URL}/api/lotes", timeout=API_TIMEOUT)
+                # Usamos la nueva ruta única para evitar conflictos
+                res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=API_TIMEOUT)
                 if res_lotes.status_code == 200:
                     lotes = res_lotes.json()
                     self.dd_lote.options = [
@@ -142,16 +143,16 @@ class EstadisticasScreen:
         self.page.update()
 
     def show(self):
-        """Retorna la vista de Lotes"""
+        """Retorna la vista de Estadísticas"""
         
         # Solo cargamos filtros si la lista está vacía (evita perder selección al volver)
-        if not self.dd_campana.options:
+        if not self.dd_lote.options:
             threading.Thread(target=self.cargar_filtros, daemon=True).start()
 
         return ft.View(
-            route="/lotes",
+            route="/estadisticas",
             appbar=UIStyles.get_appbar(
-                "Gestión de Lotes", 
+                "Estadísticas de Rinde", 
                 on_home_click=lambda _: self.page.go("/menu")
             ),
             vertical_alignment=ft.MainAxisAlignment.START,
@@ -164,7 +165,8 @@ class EstadisticasScreen:
                     content=ft.Column([
                         ft.Text("Filtros de Búsqueda", size=16, weight="bold"),
                         ft.Row([
-                            self.dd_campana,
+                            self.dd_lote,
+                            self.dd_cultivo,
                         ], spacing=10),
                         
                         ft.Divider(),

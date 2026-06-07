@@ -3,12 +3,12 @@ from database import obtener_conexion
 
 estadisticas_bp = Blueprint('estadisticas', __name__)
 
-@estadisticas_bp.route('/api/lotes', methods=['GET'])
+@estadisticas_bp.route('/api/estadisticas/lotes', methods=['GET'])
 def get_lotes_unificados():
     query = """
         SELECT DISTINCT Nombre
         FROM (
-            SELECT nombre_lote AS Nombre FROM v2.Lotes
+            SELECT nombre AS Nombre FROM v2.Lotes
             UNION
             SELECT nombre_bloque AS Nombre FROM v2.Bloques
         ) AS NombresUnificados

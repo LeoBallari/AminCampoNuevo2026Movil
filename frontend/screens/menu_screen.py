@@ -36,9 +36,7 @@ class MenuScreen:
             
         def handle_estadisticas(e):
             """Maneja click en Reportes"""
-            # El sistema de navegación nativo ahora se dispara así:
-            # self.page.go("/despachos")
-            print("Navegando a Reportes")
+            self.page.go("/estadisticas")
         
         def handle_fertilizacion(e):
             """Maneja click en Fertilización"""
