@@ -117,8 +117,12 @@ class EstadisticasScreen:
                 res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=API_TIMEOUT)
                 if res_lotes.status_code == 200:
                     lotes = res_lotes.json()
+                    # Limpiamos opciones previas antes de cargar nuevas
+                    self.dd_lote.options = []
                     self.dd_lote.options = [
-                        ft.dropdown.Option(key=str(l['id']), text=l['nombre']) for l in lotes
+                        ft.dropdown.Option(key=str(l.get('id')), text=str(l.get('nombre'))) 
+                        for l in lotes 
+                        if l.get('nombre')
                     ]
 
                 # 2. Obtener Cultivos

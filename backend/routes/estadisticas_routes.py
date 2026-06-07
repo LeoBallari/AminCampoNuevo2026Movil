@@ -8,11 +8,12 @@ def get_lotes_unificados():
     query = """
         SELECT DISTINCT Nombre
         FROM (
-            SELECT nombre AS Nombre FROM v2.Lotes
+            SELECT nombre_lote AS Nombre FROM v2.Lotes WHERE nombre_lote IS NOT NULL
             UNION
-            SELECT nombre_bloque AS Nombre FROM v2.Bloques
+            SELECT nombre_bloque AS Nombre FROM v2.Bloques WHERE nombre_bloque IS NOT NULL
         ) AS NombresUnificados
-        ORDER BY Nombre;    
+        WHERE Nombre <> ''
+        ORDER BY Nombre;
     """
     try:
         conn = obtener_conexion()
