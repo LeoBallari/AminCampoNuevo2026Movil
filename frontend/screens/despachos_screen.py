@@ -135,19 +135,20 @@ class DespachosScreen:
                     ]
                     
                     detalle_controls = [
-                        ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
+                        UIStyles.get_card_container(
+                            ft.Text(nombre_entidad, weight="bold", size=18),
+                            padding=15,
+                            margin=ft.margin.only(bottom=10)
+                        ),
                         ft.Divider(),
                     ]
 
                     if detalles:
                         # Envolvemos la tabla en un Row con scroll para permitir desplazamiento horizontal
                         detalle_controls.append(
-                            ft.Container(
-                                content=ft.Row(
-                                    [self.tabla_datos],
-                                    scroll=ft.ScrollMode.AUTO,
-                                ),
-                                padding=ft.padding.only(bottom=20)
+                            UIStyles.get_card_container(
+                                ft.Row([self.tabla_datos], scroll=ft.ScrollMode.AUTO),
+                                margin=ft.margin.only(bottom=20)
                             )
                         )
                     else:
@@ -221,7 +222,7 @@ class DespachosScreen:
                                 expand=True,
                                 padding=ft.padding.only(left=2, right=2, top=10, bottom=10),
                                 content=ft.Column([
-                                    ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
+                                    ft.Text(nombre_entidad, weight="bold", size=18),
                                     ft.Divider(),
                                     ft.Text(
                                         f"No se pudo cargar el detalle: {error_msg}",
@@ -261,7 +262,7 @@ class DespachosScreen:
                         expand=True,
                         padding=ft.padding.only(left=2, right=2, top=10, bottom=10),
                         content=ft.Column([
-                            ft.Text(nombre_entidad, weight="bold", size=18, color=ft.Colors.BLUE_GREY_800),
+                            ft.Text(nombre_entidad, weight="bold", size=18),
                             ft.Divider(),
                             ft.Text(
                                 f"No se pudo cargar el detalle: {e}",

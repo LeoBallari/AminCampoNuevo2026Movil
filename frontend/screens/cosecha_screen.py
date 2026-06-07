@@ -106,7 +106,11 @@ class CosechaScreen:
                         )
 
                         # Envolver tabla en un scroll horizontal por si la pantalla es chica
-                        self.lv_resumen.controls.append(ft.Row([tabla], scroll=ft.ScrollMode.AUTO))
+                        self.lv_resumen.controls.append(
+                            UIStyles.get_card_container(
+                                ft.Row([tabla], scroll=ft.ScrollMode.AUTO)
+                            )
+                        )
                         
                         # Resumen del grupo (Subtotales resaltados)
                         self.lv_resumen.controls.append(

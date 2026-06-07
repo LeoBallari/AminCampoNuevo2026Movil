@@ -73,7 +73,6 @@ class App:
                 res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=15)
                 if res_lotes.status_code == 200:
                     self.page.session.set("global_lotes_unificados", res_lotes.json())
-                print("DEBUG: Filtros globales pre-cargados exitosamente")
         except Exception as e:
             print(f"Error pre-cargando filtros globales: {e}")
         

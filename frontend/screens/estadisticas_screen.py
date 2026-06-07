@@ -189,31 +189,53 @@ class EstadisticasScreen:
                         interactive=True,
                         expand=True,
                     )
+                    
+                    # Título de sección de detalle consistente con Cosecha
+                    self.lv_resumen.controls.append(
+                        ft.Container(
+                            content=ft.Text("DETALLE POR CAMPAÑA", weight="bold", color=ft.Colors.BLUE_700),
+                            margin=ft.margin.only(top=10, bottom=5, left=5)
+                        )
+                    )
 
+                    filas_tabla = []
                     for it in datos:
                         rinde = float(it.get('rinde', 0))
                         produccion = float(it.get('total_kg', 0))
                         has = float(it.get('has', 0))
 
-                        # Fila de detalle (Fondo blanco con etiqueta resaltada para rinde)
-                        self.lv_resumen.controls.append(
-                            ft.Container(
-                                content=ft.Row([
-                                    ft.Text(it.get('campaña', 'S/D'), size=13, weight="bold", expand=1.2),
-                                    ft.Text(f"{produccion:,.0f} kg", size=13, expand=1.5, text_align=ft.TextAlign.CENTER),
-                                    ft.Text(f"{has:.1f} ha", size=13, expand=1, text_align=ft.TextAlign.CENTER),
-                                    ft.Container(
-                                        content=ft.Text(f"{rinde:.2f} qq", size=12, weight="bold", color=ft.Colors.WHITE),
-                                        bgcolor=ft.Colors.BLUE_700,
-                                        padding=ft.padding.symmetric(horizontal=8, vertical=4),
-                                        border_radius=5,
-                                    ),
-                                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                                padding=ft.padding.symmetric(horizontal=10, vertical=12),
-                                bgcolor=ft.Colors.WHITE,
-                                border=ft.border.only(bottom=ft.BorderSide(0.5, ft.Colors.OUTLINE_VARIANT)),
-                            )
+                        filas_tabla.append(ft.DataRow(cells=[
+                            ft.DataCell(ft.Text(it.get('campaña', 'S/D'), size=13, weight="bold")),
+                            ft.DataCell(ft.Text(f"{produccion:,.0f} kg", size=13)),
+                            ft.DataCell(ft.Text(f"{has:.1f} ha", size=13)),
+                            ft.DataCell(
+                                ft.Container(
+                                    content=ft.Text(f"{rinde:.2f} qq", size=12, weight="bold", color=ft.Colors.WHITE),
+                                    bgcolor=ft.Colors.BLUE_700,
+                                    padding=ft.padding.symmetric(horizontal=8, vertical=4),
+                                    border_radius=5,
+                                )
+                            ),
+                        ]))
+
+                    tabla = ft.DataTable(
+                        columns=[
+                            ft.DataColumn(ft.Text("Campaña", size=14)),
+                            ft.DataColumn(ft.Text("Producción", size=14)),
+                            ft.DataColumn(ft.Text("Has", size=14)),
+                            ft.DataColumn(ft.Text("Rinde", size=14)),
+                        ],
+                        rows=filas_tabla,
+                        column_spacing=15,
+                        heading_row_height=35,
+                        horizontal_margin=10,
+                    )
+
+                    self.lv_resumen.controls.append(
+                        UIStyles.get_card_container(
+                            ft.Row([tabla], scroll=ft.ScrollMode.AUTO)
                         )
+                    )
                 else:
                     print(f"Error API: {res.status_code}")
         except Exception as e:
@@ -305,17 +327,6 @@ class EstadisticasScreen:
                         self.chart_container,
                         
                         #ft.Text("Detalle por Campaña", size=16, weight="bold"),
-                        # Encabezado de la lista
-                        ft.Container(
-                            content=ft.Row([
-                                ft.Text("Campaña", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", expand=1.2),
-                                ft.Text("Producción", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", expand=1.5, text_align=ft.TextAlign.CENTER),
-                                ft.Text("Has", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", expand=1, text_align=ft.TextAlign.CENTER),
-                                ft.Text("Rinde", size=11, color=ft.Colors.BLUE_GREY_400, weight="bold", width=65, text_align=ft.TextAlign.CENTER),
-                            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                            padding=ft.padding.symmetric(horizontal=10, vertical=8),
-                            bgcolor=ft.Colors.GREY_50,
-                        ),
                         self.lv_resumen
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.START,

@@ -37,3 +37,15 @@ class UIStyles:
                 blur_radius=10, color=ft.Colors.with_opacity(0.3, "black")
             ),
         )
+
+    @staticmethod
+    def get_card_container(content, padding=10, margin=0):
+        """Genera un contenedor con estilo de tarjeta estandarizado (Surface Variant)"""
+        return ft.Container(
+            content=content,
+            bgcolor="surfacevariant",
+            border_radius=8,
+            padding=padding,
+            margin=margin,
+            border=ft.border.all(0.5, "outlinevariant"),
+        )

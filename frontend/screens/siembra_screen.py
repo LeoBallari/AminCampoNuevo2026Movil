@@ -71,40 +71,44 @@ class SiembraScreen:
                             )
                         )
 
-                        # Encabezado de la "tabla" simplificada
-                        self.lv_resumen.controls.append(
-                            ft.Container(
-                                content=ft.Row([
-                                    ft.Text("Fecha", size=14, weight="bold", width=95),
-                                    ft.Text("Lote", size=14, weight="bold", expand=True),
-                                    ft.Text("Has", size=14, weight="bold", width=60, text_align="right"),
-                                ], spacing=10),
-                                padding=ft.padding.symmetric(horizontal=10, vertical=5),
-                                bgcolor=ft.Colors.BLUE_GREY_50
-                            )
-                        )
-
+                        filas_tabla = []
                         subtotal_has = 0
                         for it in items:
                             has = float(it.get('has', 0))
                             subtotal_has += has
                             fecha_str = it.get('fecha', '')[:10] if it.get('fecha') else ""
                             
-                            # Fila de datos en dos niveles
-                            self.lv_resumen.controls.append(
-                                ft.Container(
-                                    content=ft.Column([
-                                        ft.Row([
-                                            ft.Text(fecha_str, size=14, width=95),
-                                            ft.Text(it.get('bloque', 'S/D'), size=14, weight="bold", expand=True),
-                                            ft.Text(f"{has:.1f}", size=14, width=60, text_align="right"),
-                                        ], spacing=10),
-                                        ft.Text(it.get('insumos', ''), size=13, color=ft.Colors.BLUE_GREY_400, italic=True),
-                                    ], spacing=2),
-                                    padding=ft.padding.symmetric(horizontal=10, vertical=8),
-                                    border=ft.border.only(bottom=ft.BorderSide(0.5, ft.Colors.BLUE_GREY_100))
-                                )
+                            filas_tabla.append(ft.DataRow(cells=[
+                                ft.DataCell(ft.Text(fecha_str, size=13)),
+                                ft.DataCell(
+                                    ft.Column([
+                                        ft.Text(it.get('bloque', 'S/D'), size=13, weight="bold"),
+                                        ft.Text(it.get('insumos', ''), size=11, color=ft.Colors.BLUE_GREY_400, italic=True)
+                                    ], spacing=0, tight=True, alignment=ft.MainAxisAlignment.CENTER)
+                                ),
+                                ft.DataCell(ft.Text(f"{has:.1f}", size=13)),
+                            ]))
+
+                        # Crear la Tabla (Grilla)
+                        tabla = ft.DataTable(
+                            columns=[
+                                ft.DataColumn(ft.Text("Fecha", size=14)),
+                                ft.DataColumn(ft.Text("Lote", size=14)),
+                                ft.DataColumn(ft.Text("Has", size=14)),
+                            ],
+                            rows=filas_tabla,
+                            column_spacing=22,
+                            heading_row_height=35,
+                            data_row_min_height=48, # Un poco más alto para las dos líneas de Lote
+                            horizontal_margin=10,
+                        )
+
+                        # Envolver tabla en un scroll horizontal y usar el contenedor de tarjeta
+                        self.lv_resumen.controls.append(
+                            UIStyles.get_card_container(
+                                ft.Row([tabla], scroll=ft.ScrollMode.AUTO)
                             )
+                        )
                         
                         # Resumen del grupo (Subtotales resaltados)
                         self.lv_resumen.controls.append(
