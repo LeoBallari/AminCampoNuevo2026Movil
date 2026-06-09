@@ -77,7 +77,7 @@ class LotesScreen:
                                 padding=ft.padding.symmetric(horizontal=12, vertical=10),
                                 bgcolor="surfacevariant",
                                 border_radius=8,
-                                border=ft.border.all(0.5, ft.colors.OUTLINE_VARIANT),
+                                border=ft.border.all(0.5, ft.Colors.OUTLINE_VARIANT),
                             )
                         )
                 else:

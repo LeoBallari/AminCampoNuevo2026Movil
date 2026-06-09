@@ -1,32 +1,37 @@
 import flet as ft
 import threading
 import httpx
-import time
 from config import API_URL, API_TIMEOUT
 from ui_styles import UIStyles
 
 class EstadisticasScreen:
     def __init__(self, page: ft.Page):
         self.page = page
-
-        # Estado para selección múltiple
-        self.lotes_master = []
-        self.lotes_seleccionados = []
-
-        self.dd_lote = ft.TextField(
-            label="Lotes (Múltiple)",
+        self.campos_master = []  # Lista de campos físicos: [{"id": 1, "nombre": "TORRISSI"}, ...]
+        self.campos_seleccionados_ids = []  # Guardamos IDs seleccionados
+        self.campos_seleccionados_nombres = []  # Guardamos nombres para mostrar
+        
+        # Campo de texto que simula un dropdown para selección múltiple
+        self.txt_campos = ft.TextField(
+            label="Campos Físicos (Múltiple)",
             value="Seleccionar...",
             read_only=True,
             expand=True,
-            on_click=self.abrir_selector_lotes,
+            on_click=self.abrir_selector_campos,
             prefix_icon=ft.Icons.LIST_ALT_OUTLINED
         )
-        self.dd_cultivo = ft.Dropdown(label="Cultivo", expand=True, on_change=self.on_filter_change)
+        
+        self.dd_cultivo = ft.Dropdown(
+            label="Cultivo", 
+            expand=True, 
+            on_change=self.on_filter_change
+        )
+        
         self.loading = ft.ProgressBar(visible=False, color=ft.Colors.BLUE_400)
         self.lv_resumen = ft.ListView(expand=True, spacing=0, padding=ft.padding.only(bottom=20))
         
-        # Título dinámico para mostrar lotes seleccionados arriba del gráfico
-        self.txt_lotes_titulo = ft.Text(
+        # Título dinámico para mostrar campos seleccionados
+        self.txt_campos_titulo = ft.Text(
             "",
             size=14,
             color=ft.Colors.BLUE_700,
@@ -44,61 +49,62 @@ class EstadisticasScreen:
             border_radius=10,
         )
         
-        # Controles para el footer (ahora por separado para dos renglones)
+        # Totales en footer
         self.txt_total_kg = ft.Text("0 kg", color=ft.Colors.WHITE, weight="bold", size=16)
         self.txt_avg_rinde = ft.Text("0.0 qq/ha", color=ft.Colors.BLUE_200, weight="w500", size=14)
 
     def on_filter_change(self, e):
         """Evento cuando cambia un filtro"""
-        if self.lotes_seleccionados and self.dd_cultivo.value:
+        if self.campos_seleccionados_ids and self.dd_cultivo.value:
             threading.Thread(target=self.cargar_resumen, daemon=True).start()
 
-    def abrir_selector_lotes(self, e):
-        """Abre un diálogo para seleccionar múltiples lotes"""
-        if not self.lotes_master:
-            # Intentar recuperar de la sesión si la lista está vacía
-            cache = self.page.session.get("global_lotes_unificados")
-            if cache: self.lotes_master = cache
+    def abrir_selector_campos(self, e):
+        """Abre un diálogo para seleccionar múltiples campos físicos"""
+        if not self.campos_master:
+            cache = self.page.session.get("global_campos_fisicos")
+            if cache:
+                self.campos_master = cache
 
-        def toggle_lote(e, nombre):
+        def toggle_campo(e, campo_id, campo_nombre):
             if e.control.value:
-                if nombre not in self.lotes_seleccionados:
-                    self.lotes_seleccionados.append(nombre)
+                if campo_id not in self.campos_seleccionados_ids:
+                    self.campos_seleccionados_ids.append(campo_id)
+                    self.campos_seleccionados_nombres.append(campo_nombre)
             else:
-                if nombre in self.lotes_seleccionados:
-                    self.lotes_seleccionados.remove(nombre)
+                if campo_id in self.campos_seleccionados_ids:
+                    idx = self.campos_seleccionados_ids.index(campo_id)
+                    self.campos_seleccionados_ids.pop(idx)
+                    self.campos_seleccionados_nombres.pop(idx)
 
         def confirmar_seleccion(e):
             dialog.open = False
-            cant = len(self.lotes_seleccionados)
-            self.dd_lote.value = f"{cant} lotes seleccionados" if cant > 0 else "Seleccionar..."
+            cant = len(self.campos_seleccionados_ids)
+            self.txt_campos.value = f"{cant} campos seleccionados" if cant > 0 else "Seleccionar..."
             
-            # Actualizar el título de lotes seleccionados
-            if self.lotes_seleccionados:
-                self.txt_lotes_titulo.value = f"Lotes: {', '.join(self.lotes_seleccionados)}"
-                self.txt_lotes_titulo.visible = True
+            if self.campos_seleccionados_nombres:
+                self.txt_campos_titulo.value = f"Campos: {', '.join(self.campos_seleccionados_nombres)}"
+                self.txt_campos_titulo.visible = True
             else:
-                self.txt_lotes_titulo.visible = False
+                self.txt_campos_titulo.visible = False
                 
             self.page.update()
             self.on_filter_change(None)
 
-        def obtener_nombre(l):
-            if isinstance(l, dict):
-                return l.get('nombre') or l.get('bloque') or "S/D"
-            return str(l)
-
         # Crear lista de checkboxes
-        checks = [
-            ft.Checkbox(
-                label=obtener_nombre(l),
-                value=obtener_nombre(l) in self.lotes_seleccionados,
-                on_change=lambda e, n=obtener_nombre(l): toggle_lote(e, n)
-            ) for l in self.lotes_master
-        ]
+        checks = []
+        for c in self.campos_master:
+            campo_id = c['id']
+            campo_nombre = c['nombre']
+            checks.append(
+                ft.Checkbox(
+                    label=campo_nombre,
+                    value=campo_id in self.campos_seleccionados_ids,
+                    on_change=lambda e, cid=campo_id, cnom=campo_nombre: toggle_campo(e, cid, cnom)
+                )
+            )
 
         dialog = ft.AlertDialog(
-            title=ft.Text("Seleccionar Lotes"),
+            title=ft.Text("Seleccionar Campos Físicos"),
             content=ft.Container(
                 content=ft.Column(checks, scroll=ft.ScrollMode.AUTO, tight=True),
                 height=350,
@@ -118,11 +124,13 @@ class EstadisticasScreen:
         self.page.update()
 
         try:
+            # Enviar IDs de campos físicos (no nombres)
+            lotes_ids_str = ",".join(str(cid) for cid in self.campos_seleccionados_ids)
             params = {
-                # Enviamos la lista de nombres de lotes bajo la clave 'lotes'
-                "lotes": ",".join(self.lotes_seleccionados), 
+                "lotes_ids": lotes_ids_str,
                 "id_cultivo": self.dd_cultivo.value
             }
+            
             with httpx.Client() as client:
                 res = client.get(f"{API_URL}/api/estadisticas", params=params, timeout=API_TIMEOUT)
                 if res.status_code == 200:
@@ -142,7 +150,7 @@ class EstadisticasScreen:
                         self.page.update()
                         return
 
-                    # Calcular Totales para el Resumen del Resumen
+                    # Calcular Totales
                     total_kg = sum(float(it.get('total_kg', 0)) for it in datos)
                     total_has = sum(float(it.get('has', 0)) for it in datos)
                     avg_rinde = (total_kg / 100.0) / total_has if total_has > 0 else 0
@@ -150,14 +158,15 @@ class EstadisticasScreen:
                     self.txt_total_kg.value = f"{total_kg:,.0f} kg"
                     self.txt_avg_rinde.value = f"Promedio: {avg_rinde:.2f} qq/ha"
 
-                    # --- Lógica del Gráfico de Barras ---
+                    # Gráfico de Barras
                     bar_groups = []
                     chart_labels = []
                     max_rinde = 0
 
                     for i, it in enumerate(datos):
                         rinde = float(it.get('rinde', 0))
-                        if rinde > max_rinde: max_rinde = rinde
+                        if rinde > max_rinde:
+                            max_rinde = rinde
                         
                         bar_groups.append(
                             ft.BarChartGroup(
@@ -190,7 +199,7 @@ class EstadisticasScreen:
                         expand=True,
                     )
                     
-                    # Título de sección de detalle consistente con Cosecha
+                    # Título de detalle
                     self.lv_resumen.controls.append(
                         ft.Container(
                             content=ft.Text("DETALLE POR CAMPAÑA", weight="bold", color=ft.Colors.BLUE_700),
@@ -251,19 +260,18 @@ class EstadisticasScreen:
 
         try:
             with httpx.Client() as client:
-                # 1. Obtener Lotes/Bloques
-                lotes = self.page.session.get("global_lotes_unificados")
-                if not lotes:
-                    res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=API_TIMEOUT)
-                    if res_lotes.status_code == 200:
-                        lotes = res_lotes.json()
-                        self.page.session.set("global_lotes_unificados", lotes)
+                # 1. Obtener Campos Físicos
+                campos = self.page.session.get("global_campos_fisicos")
+                if not campos:
+                    res_campos = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=API_TIMEOUT)
+                    if res_campos.status_code == 200:
+                        campos = res_campos.json()
+                        self.page.session.set("global_campos_fisicos", campos)
 
-                if lotes:
-                    self.lotes_master = lotes
+                if campos:
+                    self.campos_master = campos
 
                 # 2. Obtener Cultivos
-                # Intentamos usar la sesión global para cultivos
                 cultivos = self.page.session.get("global_cultivos")
                 if not cultivos:
                     res_cul = client.get(f"{API_URL}/api/cultivos", timeout=API_TIMEOUT)
@@ -272,9 +280,8 @@ class EstadisticasScreen:
                         self.page.session.set("global_cultivos", cultivos)
                 
                 if cultivos:
-                    # Usamos el NOMBRE como key porque el backend filtra por nombre_cultivo
                     self.dd_cultivo.options = [
-                        ft.dropdown.Option(key=c['nombre'], text=c['nombre']) for c in cultivos
+                        ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in cultivos
                     ]
 
         except Exception as e:
@@ -286,19 +293,19 @@ class EstadisticasScreen:
     def show(self):
         """Retorna la vista de Estadísticas"""
         
-        # 1. Sincronizar Lotes y Cultivos desde la sesión global inmediatamente si existen
-        lotes_cache = self.page.session.get("global_lotes_unificados")
-        if lotes_cache:
-            self.lotes_master = lotes_cache
+        # Sincronizar desde sesión
+        campos_cache = self.page.session.get("global_campos_fisicos")
+        if campos_cache:
+            self.campos_master = campos_cache
             
         cultivos_cache = self.page.session.get("global_cultivos")
         if cultivos_cache:
             self.dd_cultivo.options = [
-                ft.dropdown.Option(key=c['nombre'], text=c['nombre']) for c in cultivos_cache
+                ft.dropdown.Option(key=str(c['id']), text=c['nombre']) for c in cultivos_cache
             ]
-
-        # 2. Si algo falta (porque la sesión falló o aún no cargó), disparamos la carga desde la API
-        if not self.lotes_master or not self.dd_cultivo.options:
+            
+        # Si falta algo, cargar
+        if not self.campos_master or not self.dd_cultivo.options:
             threading.Thread(target=self.cargar_filtros, daemon=True).start()
 
         return ft.View(
@@ -317,22 +324,18 @@ class EstadisticasScreen:
                     content=ft.Column([
                         ft.Text("Filtros de Búsqueda", size=16, weight="bold"),
                         ft.Row([
-                            self.dd_lote,
+                            self.txt_campos,
                             self.dd_cultivo,
                         ], spacing=10),
                         
                         ft.Divider(),
-                        self.txt_lotes_titulo,
-                        #ft.Text("Evolución de Rinde (qq/ha)", size=16, weight="bold"),
+                        self.txt_campos_titulo,
                         self.chart_container,
-                        
-                        #ft.Text("Detalle por Campaña", size=16, weight="bold"),
                         self.lv_resumen
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.START,
                     expand=True)
                 ),
-                # Footer Estetico con el resumen de totales
                 UIStyles.get_footer_container(
                     ft.Column([
                         ft.Row([ft.Text("PRODUCCIÓN TOTAL", color=ft.Colors.BLUE_200, size=12, weight="bold"), self.txt_total_kg], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),

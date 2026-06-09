@@ -56,7 +56,7 @@ class App:
         threading.Thread(target=self._pre_cargar_filtros, daemon=True).start()
 
     def _pre_cargar_filtros(self):
-        """Carga campañas y cultivos en la sesión para acceso rápido en toda la app"""
+        """Carga campañas, cultivos y campos físicos en la sesión para acceso rápido"""
         try:
             with httpx.Client() as client:
                 # Cargar Campañas
@@ -69,10 +69,10 @@ class App:
                 if res_cult.status_code == 200:
                     self.page.session.set("global_cultivos", res_cult.json())
 
-                # Cargar Lotes Unificados para Estadísticas
-                res_lotes = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=15)
-                if res_lotes.status_code == 200:
-                    self.page.session.set("global_lotes_unificados", res_lotes.json())
+                # Cargar Campos Físicos (nuevo)
+                res_campos = client.get(f"{API_URL}/api/estadisticas/lotes", timeout=15)
+                if res_campos.status_code == 200:
+                    self.page.session.set("global_campos_fisicos", res_campos.json())
         except Exception as e:
             print(f"Error pre-cargando filtros globales: {e}")
         
