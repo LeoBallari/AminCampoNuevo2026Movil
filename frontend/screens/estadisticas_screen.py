@@ -13,7 +13,7 @@ class EstadisticasScreen:
         
         # Campo de texto que simula un dropdown para selección múltiple
         self.txt_campos = ft.TextField(
-            label="Campos Físicos (Múltiple)",
+            label="Campos Físicos",
             value="Seleccionar...",
             read_only=True,
             expand=True,
