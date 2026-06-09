@@ -7,6 +7,7 @@ from config import BASE_DIR, APP_TITLE, THEME_MODE, WINDOW_WIDTH, WINDOW_HEIGHT,
 from screens.login_screen import LoginScreen
 import sys
 from screens.menu_screen import MenuScreen
+from screens.splash_screen import SplashScreen
 from screens.config_screen import ConfigScreen
 import os
 import threading
@@ -17,6 +18,10 @@ class App:
     
     def __init__(self, page: ft.Page):
         self.page = page
+        
+        # 🚀 DISPARO TEMPRANO: Despertar el backend en Render de inmediato
+        # Se ejecuta en un hilo separado con un timeout bajo para no trabar el inicio en Android.
+        threading.Thread(target=self._despertar_backend, daemon=True).start()
         
         # Asegurar que el directorio raíz de frontend esté en el path
         if BASE_DIR not in sys.path:
@@ -55,6 +60,16 @@ class App:
         # Iniciar carga de datos globales en segundo plano para acelerar los filtros
         threading.Thread(target=self._pre_cargar_filtros, daemon=True).start()
 
+    def _despertar_backend(self):
+        """Envía una petición rápida al backend para mitigar el Cold Start de Render"""
+        try:
+            with httpx.Client() as client:
+                # El simple intento de conexión fuerza a Render a iniciar el Spin Up
+                client.get(f"{API_URL}/", timeout=3.0)
+        except Exception:
+            # Ignoramos timeouts o errores de ruta; el estímulo al servidor ya fue enviado
+            pass
+
     def _pre_cargar_filtros(self):
         """Carga campañas, cultivos y campos físicos en la sesión para acceso rápido"""
         try:
@@ -86,20 +101,22 @@ class App:
         self.usuario_actual = None
         self.despachos_screen = None
         self.fertilizacion_screen = None # Limpiar cache al salir
-        self.page.go("/")
+        self.page.go("/login")
         
     def on_route_change(self, e):
         """Manejador central de cambios de pantalla"""
-        # No limpiamos la pila si vamos al detalle, para permitir que se apile
-        # sobre la pantalla de despachos principal.
         if self.page.route != "/despachos/detalle":
             self.page.views.clear()
         
-        # 1. Pantalla de Login
+        # 0. Splash Screen (Ruta Inicial)
         if self.page.route == "/":
+            splash = SplashScreen(self.page, on_complete=lambda: self.page.go("/login"))
+            self.page.views.append(splash.show())
+
+        # 1. Pantalla de Login
+        elif self.page.route == "/login":
             login_screen = LoginScreen(self.page, on_login_success=self.on_login_success)
             self.page.views.append(login_screen.show())
-            
         # 2. Pantalla de Menú Principal
         elif self.page.route == "/menu":
             menu_screen = MenuScreen(self.page, self.usuario_actual, on_logout=self.on_logout)
@@ -145,8 +162,6 @@ class App:
             self.page.views.append(self.estadisticas_screen.show())
 
         elif self.page.route == "/despachos/detalle":
-            # La vista de detalle ya se construye desde DespachosScreen.
-            # No agregamos una nueva vista aquí para evitar duplicados.
             pass
 
         self.page.update()

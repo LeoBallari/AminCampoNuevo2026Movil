@@ -65,7 +65,7 @@ class LoginScreen:
             [
                 ft.ProgressRing(width=20, height=20, stroke_width=2, color="#1565C0"),
                 ft.Text(
-                    "Despertando servidor, aguarde un momento",
+                    "Corroborando credenciales con el servidor...",
                     size=13,
                     color="#406080",
                     italic=True
@@ -170,7 +170,7 @@ class LoginScreen:
         
         # === RETORNO DE VISTA NATIVA ===
         return ft.View(
-            route="/",
+            route="/login",
             #bgcolor="#1565C0",
             bgcolor=ft.Colors.WHITE,
             controls=[
